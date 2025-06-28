@@ -13,12 +13,18 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
     "@types/express": "^5.0.3",
     "@types/node": "^24.0.4",
-    "typescript": "^5.8.3",
-    "ts-node": "^10.9.2"
+    "@types/pg": "^8.15.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
   },
   "dependencies": {
-    "express": "^5.1.0"
+    "bcrypt": "^6.0.0",
+    "dotenv": "^17.0.0",
+    "env-var": "^7.5.0",
+    "express": "^5.1.0",
+    "pg": "^8.16.3"
   }
 }

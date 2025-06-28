@@ -1,4 +1,8 @@
+import { envs } from "./config";
+import { pool } from "./data/postgres/postgres-database";
+import { AppRoutes } from "./presentation/routes";
 import { Server } from "./presentation/server";
+
 
 (()=>{
     main();
@@ -6,5 +10,9 @@ import { Server } from "./presentation/server";
 
 
 async function main(){
-    new Server().start();
+    await pool.connect()
+    new Server({
+        port: envs.PORT,
+        routes: AppRoutes.routes,
+    }).start();
 }
