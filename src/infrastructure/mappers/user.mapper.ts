@@ -4,7 +4,6 @@ import { CustomError, UserEntity } from "../../domain";
 
 export class UserMapper{
 
-
     static userEntityFromObject(object:{[key:string]:any}){
         const{id, name, lastName, email, password, rol} = object;
         if(!id){

@@ -1,5 +1,5 @@
 import { BcryptAdapter } from "../../config";
-import { AuthDatasource, CustomError, RegisterUserDto, UserEntity } from "../../domain";
+import { AuthDatasource, CustomError, LoginUserDto, RegisterUserDto, UserEntity } from "../../domain";
 import {Pool} from "pg";
 import { UserMapper } from "../mappers/user.mapper";
 
@@ -14,7 +14,7 @@ export class AuthDatasourceImpl implements AuthDatasource{
 
     async findByEmail(email:string):Promise<UserEntity|null>{
         const result = await this.db.query('SELECT * FROM usuarios WHERE correo = $1',[email]);
-        if(result.rows.length == 0) return null;
+        if(result.rows.length === 0) return null;
         return result.rows[0];
     }
 
@@ -51,6 +51,43 @@ export class AuthDatasourceImpl implements AuthDatasource{
             }
             console.log(error)
             throw CustomError.badRequest(`${error}`);
+        }
+    }
+
+    async login(loginUserDto: LoginUserDto): Promise<UserEntity> {
+        const {email,password} = loginUserDto;
+        try {
+            const result = await this.db.query(
+                `
+                    SELECT 
+                    id,
+                    nombre AS name,
+                    apellidos AS "lastName",
+                    correo AS email,
+                    contrasena AS password,
+                    rol
+                    FROM usuarios
+                    WHERE correo = $1
+                `,
+                [email]
+            );
+            if(result.rows.length ===0){
+                throw CustomError.unauthorized('Invalid credentials');
+            }
+            const user = result.rows[0];
+
+            const isMatch = this.comparePassword(password, user.password);
+            if(!isMatch){
+                throw CustomError.unauthorized('invalid credentials');
+            }
+            console.log(user)
+            return UserMapper.userEntityFromObject(user);
+        } catch (error) {
+            if(error instanceof CustomError){
+                throw error
+            }
+            console.log(error)
+            throw CustomError.internalServer('Internal server error');
         }
     }
 
