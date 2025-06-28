@@ -2,6 +2,7 @@ import { envs } from "./config";
 import { pool } from "./data/postgres/postgres-database";
 import { AppRoutes } from "./presentation/routes";
 import { Server } from "./presentation/server";
+import express, { NextFunction }  from "express";
 
 
 (()=>{
@@ -10,6 +11,7 @@ import { Server } from "./presentation/server";
 
 
 async function main(){
+
     await pool.connect()
     new Server({
         port: envs.PORT,
