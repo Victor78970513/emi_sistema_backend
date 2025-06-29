@@ -5,7 +5,7 @@ export class UserEntity{
         public lastName: string,
         public email: string,
         public password: string,
-        // public createdAt: Date,
         public rol: string,
+        public isActive: boolean,
     ){}
 }

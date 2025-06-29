@@ -5,7 +5,7 @@ import { CustomError, UserEntity } from "../../domain";
 export class UserMapper{
 
     static userEntityFromObject(object:{[key:string]:any}){
-        const{id, name, lastName, email, password, rol} = object;
+        const{id, name, lastName, email, password, rol, isActive} = object;
         if(!id){
             throw CustomError.badRequest("Missing id");
         }
@@ -14,6 +14,9 @@ export class UserMapper{
         if(!email) throw CustomError.badRequest("Missing email");
         if(!password) throw CustomError.badRequest("Missing password");
         if(!rol) throw CustomError.badRequest("Missing rol");
+        if (isActive === undefined || isActive === null) {
+            throw CustomError.badRequest("Missing or invalid 'isActive' status.");
+        }
 
         return new UserEntity(
             id,
@@ -22,6 +25,7 @@ export class UserMapper{
             email,
             password,
             rol,
+            isActive,
         );
     }
 

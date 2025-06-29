@@ -12,10 +12,14 @@ export class AuthDatasourceImpl implements AuthDatasource{
         private readonly comparePassword: CompareFunction = BcryptAdapter.compare,
     ){}
 
-    async findByEmail(email:string):Promise<UserEntity|null>{
-        const result = await this.db.query('SELECT * FROM usuarios WHERE correo = $1',[email]);
-        if(result.rows.length === 0) return null;
-        return result.rows[0];
+    async findByEmail(email: string): Promise<UserEntity | null> {
+    const result = await this.db.query(
+        `SELECT id, nombre AS name, apellidos AS "lastName", correo AS email, contrasena AS password, rol
+        FROM usuarios WHERE correo = $1`,
+        [email]
+    );
+    if (result.rows.length === 0) return null;
+    return UserMapper.userEntityFromObject(result.rows[0]);
     }
 
     async register(registerUserDto: RegisterUserDto): Promise<UserEntity> {
@@ -31,7 +35,7 @@ export class AuthDatasourceImpl implements AuthDatasource{
             const hashedPassword = this.hashPassword(password);
             const result = await this.db.query(
                   `
-                    INSERT INTO usuarios(nombre, apellidos, correo, contrasena, rol)
+                    INSERT INTO usuarios(nombre, apellidos, correo, contrasena, rol, esta_activo)
                     VALUES($1, $2, $3, $4, $5)
                     RETURNING 
                         id, 
@@ -39,7 +43,8 @@ export class AuthDatasourceImpl implements AuthDatasource{
                         apellidos AS "lastName", 
                         correo AS email, 
                         contrasena AS password, 
-                        rol
+                        rol,
+                        esta_activo AS "isActive"
                     `,
                 [name,lastName,email,hashedPassword,rol]
             );
@@ -65,7 +70,8 @@ export class AuthDatasourceImpl implements AuthDatasource{
                     apellidos AS "lastName",
                     correo AS email,
                     contrasena AS password,
-                    rol
+                    rol,
+                    esta_activo AS "isActive"
                     FROM usuarios
                     WHERE correo = $1
                 `,
@@ -77,6 +83,7 @@ export class AuthDatasourceImpl implements AuthDatasource{
             const user = result.rows[0];
 
             const isMatch = this.comparePassword(password, user.password);
+
             if(!isMatch){
                 throw CustomError.unauthorized('invalid credentials');
             }
