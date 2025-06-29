@@ -4,6 +4,8 @@ import { AdminController } from "./admin.controller";
 import { pool } from "../../data/postgres/postgres-database";
 import { UserDatasourceImpl } from "../../infrastructure/datasources/user.datasource.impl";
 import { UserRepositoryImpl } from "../../infrastructure/repositories/user.repository.impl";
+import { DocenteRepositoryImpl } from "../../infrastructure/repositories/docente.repository.impl";
+import { DocenteDatasourceImpl } from "../../infrastructure/datasources/docente.datasource.impl";
 
 
 
@@ -15,9 +17,13 @@ export class AdminRoutes{
         //
         const database = new UserDatasourceImpl(pool);
         //
+        const database2 = new DocenteDatasourceImpl(pool);
+        //
         const userRepository = new UserRepositoryImpl(database);
         //
-        const controller = new AdminController(userRepository);
+        const docenteRepository = new DocenteRepositoryImpl(database2);
+        //
+        const controller = new AdminController(userRepository,docenteRepository);
 
         router.get('/users/pending',controller.getPendingUsers)
         //
