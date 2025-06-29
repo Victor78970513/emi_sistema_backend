@@ -11,7 +11,6 @@ export class UserDatasourceImpl implements UserDatasource{
     ){}
 
     async getPendingUsers(): Promise<UserEntity[]> {
-        console.log("ESTO ES ANTES DEL QUERY");
         const result = await this.db.query(
             `
                 SELECT
@@ -26,8 +25,6 @@ export class UserDatasourceImpl implements UserDatasource{
                 WHERE esta_activo = false
             `
         )
-        console.log("ESTO ES DESPUES DEL QUERY");
-        console.log(result);
         const pedingUsers = result.rows.map(row => UserMapper.userEntityFromObject(row));
         return pedingUsers;
     }
