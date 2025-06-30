@@ -39,7 +39,7 @@ export class AuthDatasourceImpl implements AuthDatasource{
             const result = await this.db.query(
                   `
                     INSERT INTO usuarios(nombre, apellidos, correo, contrasena, rol, esta_activo)
-                    VALUES($1, $2, $3, $4, $5)
+                    VALUES($1, $2, $3, $4, $5, $6)
                     RETURNING 
                         id, 
                         nombre AS name, 
@@ -49,7 +49,7 @@ export class AuthDatasourceImpl implements AuthDatasource{
                         rol,
                         esta_activo AS "isActive"
                     `,
-                [name,lastName,email,hashedPassword,rol]
+                [name,lastName,email,hashedPassword,rol,false]
             );
             const row = result.rows[0];
             return UserMapper.userEntityFromObject(row);
@@ -76,7 +76,7 @@ export class AuthDatasourceImpl implements AuthDatasource{
                     rol,
                     esta_activo AS "isActive"
                     FROM usuarios
-                    WHERE correo = $1
+                    WHERE correo = $1 AND esta_activo = TRUE;
                 `,
                 [email]
             );

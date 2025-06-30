@@ -8,7 +8,10 @@ interface UserToken{
     user:{
         id:string;
         name:string;
+        lastName: string,
         email:string;
+        rol: string;
+        isActive: boolean;
     }
 }
 
@@ -32,7 +35,10 @@ export class RegisterUser implements RegisterUserUseCase{
             user:{
                 id: user.userId,
                 name: user.name,
+                lastName: user.lastName,
                 email: user.email,
+                rol: user.rol,
+                isActive: user.isActive,
             }
         }
     }
