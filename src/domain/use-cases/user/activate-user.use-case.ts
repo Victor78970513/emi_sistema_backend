@@ -1,6 +1,7 @@
 import { UserEntity } from "../../entities/user.entity";
 import { DocenteRepository } from "../../repositories/docente.repository";
 import { UserRepository } from "../../repositories/user.repository";
+import { EmailService } from "../../services/email.service";
 
 
 interface ActivateUserUseCase{
@@ -11,6 +12,7 @@ export class ActivateUser implements ActivateUserUseCase{
     constructor(
         private readonly userRepository: UserRepository,
         private readonly docenteRepository: DocenteRepository,
+        private readonly emailService: EmailService,
     ){}
 
     async execute(userId: string): Promise<UserEntity> {
@@ -38,6 +40,7 @@ export class ActivateUser implements ActivateUserUseCase{
             categoria_docente_id: null,
             modalidad_ingreso_id: null,
         })
+        await this.emailService.sendApprovalAccountMail('yer59.chok@gmail.com',`${updateUser.name} ${updateUser.lastName}`);
         return newUser;
     }
 }

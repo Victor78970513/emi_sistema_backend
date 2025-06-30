@@ -6,6 +6,7 @@ import { UserDatasourceImpl } from "../../infrastructure/datasources/user.dataso
 import { UserRepositoryImpl } from "../../infrastructure/repositories/user.repository.impl";
 import { DocenteRepositoryImpl } from "../../infrastructure/repositories/docente.repository.impl";
 import { DocenteDatasourceImpl } from "../../infrastructure/datasources/docente.datasource.impl";
+import { ResendEmailService } from "../../infrastructure/services/nodemailer.service";
 
 
 
@@ -15,6 +16,8 @@ export class AdminRoutes{
         
         const router = Router()
         //
+        const emailService = new ResendEmailService()
+        //
         const database = new UserDatasourceImpl(pool);
         //
         const database2 = new DocenteDatasourceImpl(pool);
@@ -23,7 +26,7 @@ export class AdminRoutes{
         //
         const docenteRepository = new DocenteRepositoryImpl(database2);
         //
-        const controller = new AdminController(userRepository,docenteRepository);
+        const controller = new AdminController(userRepository,docenteRepository,emailService);
 
         router.get('/users/pending',controller.getPendingUsers)
         //

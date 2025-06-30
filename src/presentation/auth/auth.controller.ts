@@ -1,12 +1,14 @@
 import { Request, Response } from "express"
 import { AuthRepository, CustomError, LoginUser, LoginUserDto, RegisterUser, RegisterUserDto } from "../../domain";
 import { CheckAuth } from "../../domain/use-cases/auth/check-auth.use-case";
+import { EmailService } from "../../domain/services/email.service";
 
 export class AuthController{
 
     //? Injeccion de Dependencias
     constructor(
         private readonly authRepository: AuthRepository,
+        private readonly emailService: EmailService,
     ){}
 
     private handleError = (error: unknown, res:Response) => {
@@ -24,7 +26,8 @@ export class AuthController{
             res.status(400).json({error});
             return;
         }
-        new RegisterUser(this.authRepository).execute(registerUserDto!)
+        new RegisterUser(this.authRepository,undefined,this.emailService)
+        .execute(registerUserDto!)
         .then( data => res.json(data))
         .catch(error => this.handleError(error,res))
     }

@@ -1,5 +1,6 @@
 import { Request, Response } from "express"
 import { ActivateUser, CustomError, DocenteRepository, GetPendingUsers, UserRepository } from "../../domain";
+import { EmailService } from "../../domain/services/email.service";
 
 
 
@@ -7,7 +8,8 @@ export class AdminController{
 
     constructor(
         private readonly userRepository: UserRepository,
-        private readonly docenteRepository: DocenteRepository
+        private readonly docenteRepository: DocenteRepository,
+        private readonly emailService: EmailService,
     ){}
 
     private handleError = (error: unknown, res:Response) => {
@@ -32,7 +34,7 @@ export class AdminController{
             res.status(400).json({ error: 'Falta el ID del usuario en la URL' });
             return;
         }
-        new ActivateUser(this.userRepository,this.docenteRepository)
+        new ActivateUser(this.userRepository,this.docenteRepository,this.emailService)
         .execute(id)
         .then(data => res.json(data))
         .catch(error => this.handleError(error,res))
