@@ -14,6 +14,7 @@ export class GetPendingUsers implements GetPendingUsersUseCase{
     ){}
 
     async execute(): Promise<UserEntity[]> {
-        return this.userRepository.getPendingUsers()
+        const pendingAccounts = await this.userRepository.getPendingUsers();
+        return pendingAccounts;
     }
 }
