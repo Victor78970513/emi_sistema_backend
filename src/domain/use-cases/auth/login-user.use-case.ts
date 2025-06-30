@@ -11,6 +11,7 @@ interface UserToken{
         lastName: string,
         email:string;
         rol: string;
+        isActive: boolean;
     }
 }
 
@@ -39,6 +40,7 @@ export class LoginUser implements LoginUserUseCase{
                 lastName: user.lastName,
                 email: user.email,
                 rol: user.rol,
+                isActive: user.isActive,
             }
         }
     }
