@@ -12,4 +12,5 @@ export const envs = {
     JWT_SEED: get('JWT_SEED').required().asString(),
     RESEND_API_KEY: get("RESEND_API_KEY").required().asString(),
     RESEND_FROM: get("RESEND_FROM").required().asString(),
+    ADMIN_MAIL: get("ADMIN_MAIL").required().asString(),
 }

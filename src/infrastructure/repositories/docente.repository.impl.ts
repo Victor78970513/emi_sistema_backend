@@ -11,4 +11,8 @@ export class DocenteRepositoryImpl implements DocenteRepository{
     createDocente(createDocenteDto: CreateDocenteDto): Promise<DocenteEntity> {
         return this.docenteDatasource.createDocente(createDocenteDto);
     }
+
+    getPersonalInfo(docenteId: string): Promise<DocenteEntity> {
+        return this.docenteDatasource.getPersonalInfo(docenteId);
+    }    
 }

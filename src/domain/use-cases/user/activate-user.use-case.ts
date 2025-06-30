@@ -1,3 +1,4 @@
+import { envs } from "../../../config";
 import { UserEntity } from "../../entities/user.entity";
 import { DocenteRepository } from "../../repositories/docente.repository";
 import { UserRepository } from "../../repositories/user.repository";
@@ -40,7 +41,7 @@ export class ActivateUser implements ActivateUserUseCase{
             categoria_docente_id: null,
             modalidad_ingreso_id: null,
         })
-        await this.emailService.sendApprovalAccountMail('yer59.chok@gmail.com',updateUser);
+        await this.emailService.sendApprovalAccountMail(envs.ADMIN_MAIL,updateUser);
         // await this.emailService.sendApprovalAccountMail('yer59.chok@gmail.com',`${updateUser.name} ${updateUser.lastName}`);
         return newUser;
     }

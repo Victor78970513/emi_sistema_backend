@@ -111,7 +111,7 @@ export class ResendEmailService implements EmailService{
         // `;
         await resend.emails.send({
             from: envs.RESEND_FROM,
-            to: 'yer59.chok@gmail.com',
+            to: envs.ADMIN_MAIL,
             subject: "Solicitud de Registro Recibida",
             html:html,
         });

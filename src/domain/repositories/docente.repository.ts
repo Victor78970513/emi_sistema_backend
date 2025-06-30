@@ -4,4 +4,6 @@ import { DocenteEntity } from "../entities/docente.entity";
 
 export abstract class DocenteRepository{
     abstract createDocente(createDocenteDto: CreateDocenteDto):Promise<DocenteEntity>
+
+    abstract getPersonalInfo(docenteId:string):Promise<DocenteEntity>
 }
