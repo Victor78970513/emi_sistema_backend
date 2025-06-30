@@ -1,5 +1,6 @@
 import { Request, Response } from "express"
 import { AuthRepository, CustomError, LoginUser, LoginUserDto, RegisterUser, RegisterUserDto } from "../../domain";
+import { CheckAuth } from "../../domain/use-cases/auth/check-auth.use-case";
 
 export class AuthController{
 
@@ -43,5 +44,14 @@ export class AuthController{
 
     getUsers = (req: Request, res: Response) => {
         res.json
+    }
+
+    checkAuth = (req: Request, res: Response) => {
+        const {token} = req.body
+        console.log(`JWT: ${token}`)
+        new CheckAuth(this.authRepository)
+        .execute(token)
+        .then(data => res.json(data))
+        .catch(error => this.handleError(error,res))
     }
 }

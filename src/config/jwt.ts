@@ -7,13 +7,13 @@ export class JwtAdapter{
 
     static async generateToken(
         payload: object,
-        duration: number = 24):Promise<string|null>{
+        duration: number = 24000):Promise<string|null>{
 
         return new Promise((resolve) => {
 
             //TODO: generacion del SEED
 
-            jwt.sign(payload , JWT_SEED ,{expiresIn:duration}, (err, token)=>{
+            jwt.sign(payload , JWT_SEED ,{expiresIn:'7d'}, (err, token)=>{
                 if(err) return resolve(null);
                 resolve(token!)
             })

@@ -1,10 +1,13 @@
-import { BcryptAdapter } from "../../config";
+import { BcryptAdapter, JwtAdapter } from "../../config";
 import { AuthDatasource, CustomError, LoginUserDto, RegisterUserDto, UserEntity } from "../../domain";
 import {Pool} from "pg";
 import { UserMapper } from "../mappers/user.mapper";
 
 type HashFunction = (password:string)=>string
 type CompareFunction = (password:string, hashed:string)=>boolean
+interface JWTPayload {
+  id: string;
+}
 export class AuthDatasourceImpl implements AuthDatasource{
     constructor(
         private readonly db:Pool,
@@ -98,4 +101,31 @@ export class AuthDatasourceImpl implements AuthDatasource{
         }
     }
 
+    async checkAuth(token: string): Promise<UserEntity> {
+        const payload = await JwtAdapter.validateToken<JWTPayload>(token);
+        console.log(`PAYLOAD: ${payload}`)
+        if(!payload || !payload.id){
+            throw CustomError.unauthorized('Token inválido o expirado');
+        }
+
+        const result = await this.db.query(
+            `
+            SELECT 
+            id,
+            nombre AS name,
+            apellidos AS "lastName",
+            correo AS email,
+            contrasena AS password,
+            rol,
+            esta_activo AS "isActive"
+            FROM usuarios
+            WHERE id = $1
+            `,
+            [payload.id]
+        );
+        if (result.rows.length === 0) {
+            throw CustomError.notFound('Usuario no encontrado');
+        }
+        return UserMapper.userEntityFromObject(result.rows[0]);
+    }
 }
