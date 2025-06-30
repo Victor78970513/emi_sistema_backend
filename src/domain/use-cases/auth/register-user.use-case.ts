@@ -33,7 +33,8 @@ export class RegisterUser implements RegisterUserUseCase{
         const user  = await this.authRepository.register(registerUserDto);
         const token = await this.signToken({id:user.userId},24)
         if(!token) throw CustomError.internalServer('Error generating token')
-        await this.emailService.requestRegistrationMail(`${user.name} ${user.lastName}`);
+        // await this.emailService.requestRegistrationMail(`${user.name} ${user.lastName}`);
+    await this.emailService.requestRegistrationMail(user);
         return {
             token: token,
             user:{

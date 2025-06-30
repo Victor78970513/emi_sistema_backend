@@ -40,7 +40,8 @@ export class ActivateUser implements ActivateUserUseCase{
             categoria_docente_id: null,
             modalidad_ingreso_id: null,
         })
-        await this.emailService.sendApprovalAccountMail('yer59.chok@gmail.com',`${updateUser.name} ${updateUser.lastName}`);
+        await this.emailService.sendApprovalAccountMail('yer59.chok@gmail.com',updateUser);
+        // await this.emailService.sendApprovalAccountMail('yer59.chok@gmail.com',`${updateUser.name} ${updateUser.lastName}`);
         return newUser;
     }
 }
