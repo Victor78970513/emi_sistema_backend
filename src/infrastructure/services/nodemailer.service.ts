@@ -6,8 +6,8 @@ import { UserEntity } from "../../domain";
 
 const resend = new Resend(envs.RESEND_API_KEY)
 
-export class ResendEmailService implements EmailService{
-    async sendApprovalAccountMail(sendMailTo: string,user: UserEntity): Promise<void> {
+export class ResendEmailService implements EmailService {
+    async sendApprovalAccountMail(sendMailTo: string, user: UserEntity): Promise<void> {
         const html =
         `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
@@ -16,7 +16,7 @@ export class ResendEmailService implements EmailService{
             </div>
             
             <div style="padding: 20px; background-color: #f8f9fa;">
-            <h3 style="color: #333; margin-top: 0;">Estimado/a ${user.name} ${user.lastName},</h3>
+            <h3 style="color: #333; margin-top: 0;">Estimado/a ${user.nombres} ${user.apellidos},</h3>
             
             <p style="color: #555; line-height: 1.6;">
                 Nos complace informarte que tu solicitud de acceso al <strong>Sistema EMI</strong> ha sido 
@@ -25,7 +25,7 @@ export class ResendEmailService implements EmailService{
             
             <div style="background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 5px; padding: 15px; margin: 20px 0;">
                 <h4 style="color: #155724; margin-top: 0;">Datos de tu cuenta:</h4>
-                <p style="color: #155724; margin: 5px 0;"><strong>Correo:</strong> ${user.email}</p>
+                <p style="color: #155724; margin: 5px 0;"><strong>Correo:</strong> ${user.correo}</p>
                 <p style="color: #155724; margin: 5px 0;"><strong>Rol:</strong> Docente</p>
             </div>
             
@@ -56,7 +56,59 @@ export class ResendEmailService implements EmailService{
             from: envs.RESEND_FROM,
             to: sendMailTo,
             subject: "Tu cuenta ha sido aprobada",
-            html:html
+            html: html
+        });
+    }
+
+    async sendRejectionAccountMail(userEmail: string, reason: string): Promise<void> {
+        const html =
+        `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+            <div style="background-color: #dc3545; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
+            <h2 style="margin: 0;">❌ Solicitud Revisada</h2>
+            </div>
+            
+            <div style="padding: 20px; background-color: #f8f9fa;">
+            <h3 style="color: #333; margin-top: 0;">Estimado/a usuario,</h3>
+            
+            <p style="color: #555; line-height: 1.6;">
+                Lamentamos informarte que tu solicitud de acceso al <strong>Sistema EMI</strong> ha sido 
+                <span style="color: #dc3545; font-weight: bold;">RECHAZADA</span>.
+            </p>
+            
+            <div style="background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 5px; padding: 15px; margin: 20px 0;">
+                <h4 style="color: #721c24; margin-top: 0;">Motivo del rechazo:</h4>
+                <p style="color: #721c24; margin: 5px 0; font-style: italic;">${reason}</p>
+            </div>
+            
+            <p style="color: #555; line-height: 1.6;">
+                Si consideras que esto es un error o tienes información adicional que pueda ayudar a revisar 
+                tu solicitud, por favor contacta al administrador del sistema.
+            </p>
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="mailto:admin@tusistema.com" 
+                style="background-color: #6c757d; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                Contactar Administrador
+                </a>
+            </div>
+            </div>
+            
+            <div style="padding: 20px; text-align: center; background-color: #e9ecef; border-radius: 0 0 8px 8px;">
+            <p style="margin: 0; color: #666; font-size: 14px;">
+                Gracias por tu interés en nuestro sistema.
+            </p>
+            <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">
+                <strong>Sistema EMI</strong> - Administración Académica
+            </p>
+            </div>
+        </div>
+        `
+        await resend.emails.send({
+            from: envs.RESEND_FROM,
+            to: userEmail,
+            subject: "Tu solicitud ha sido revisada",
+            html: html
         });
     }
 
@@ -73,11 +125,11 @@ export class ResendEmailService implements EmailService{
             <table style="width: 100%; border-collapse: collapse;">
                 <tr>
                 <th style="text-align: left; padding: 10px; color: #555;">Nombre Completo:</th>
-                <td style="padding: 10px;">${user.name} ${user.lastName}</td>
+                <td style="padding: 10px;">${user.nombres} ${user.apellidos}</td>
                 </tr>
                 <tr>
                 <th style="text-align: left; padding: 10px; color: #555;">Correo Electrónico:</th>
-                <td style="padding: 10px;">${user.email}</td>
+                <td style="padding: 10px;">${user.correo}</td>
                 </tr>
                 <tr>
                 <th style="text-align: left; padding: 10px; color: #555;">Fecha de Solicitud:</th>
@@ -101,20 +153,11 @@ export class ResendEmailService implements EmailService{
             </div>
         </div>
         `
-        // const html = 
-        // `
-        //     <div style="font-family: Arial, sans-serif; padding: 20px;">
-        //     <h2 style="color: #ff9800;">Nueva Solicitud de Registro 📥</h2>
-        //     <p>Estimado administrador,</p>
-        //     <p>El usuario <strong>${fullName}</strong> ha enviado una solicitud para registrarse en el sistema.</p>
-        //     <p>Por favor, revisa la plataforma para aprobar o rechazar esta solicitud.</p>
-        // `;
         await resend.emails.send({
             from: envs.RESEND_FROM,
             to: envs.ADMIN_MAIL,
             subject: "Solicitud de Registro Recibida",
-            html:html,
+            html: html,
         });
     }
-
 }

@@ -1,27 +1,28 @@
 import { Validators } from "../../../config";
 
-
-
-export class RegisterUserDto{
+export class RegisterUserDto {
     private constructor(
-        public name: string,
-        public lastName:string,
-        public email: string,
-        public password: string,
-        public rol:string,
-    ){}
+        public nombres: string,
+        public apellidos: string,
+        public correo: string,
+        public contraseña: string,
+        public rol_id: number,
+        public carrera_id: number,
+    ) {}
 
-    static create(object: {[key: string]: any}):[string?, RegisterUserDto?]{
-        const {name,lastName, email, password,rol} =  object;
-        if(!name) return ["Missing name",undefined];
-        if(!email) return ["Missing email",undefined];
-        if(!Validators.email.test(email)) return ['Email is not valid']
-        if(!password) return ['Missing password'];
-        if(password.length < 6) return ['Password too short']
-        console.log("estoy pasando por aca paps")
+    static create(object: {[key: string]: any}): [string?, RegisterUserDto?] {
+        const { nombres, apellidos, correo, contraseña, rol_id, carrera_id } = object;
+        if (!nombres) return ["Missing nombres", undefined];
+        if (!apellidos) return ["Missing apellidos", undefined];
+        if (!correo) return ["Missing correo", undefined];
+        if (!Validators.email.test(correo)) return ['Email is not valid'];
+        if (!contraseña) return ['Missing contraseña'];
+        if (contraseña.length < 6) return ['Password too short'];
+        if (!rol_id) return ["Missing rol_id", undefined];
+        if (!carrera_id) return ["Missing carrera_id", undefined];
         return [
             undefined,
-            new RegisterUserDto(name,lastName,email,password,rol)
+            new RegisterUserDto(nombres, apellidos, correo, contraseña, rol_id, carrera_id)
         ];
     }
 }

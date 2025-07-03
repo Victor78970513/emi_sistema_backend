@@ -10,8 +10,9 @@ export class UserRepositoryImpl implements UserRepository{
     getPendingUsers(): Promise<UserEntity[]> {
         return this.userDataSource.getPendingUsers();
     }
-    activateUser(userId: string): Promise<UserEntity> {
-        return this.userDataSource.activateUser(userId);
+
+    updateUserStatus(userId: string, action: 'approve' | 'reject'): Promise<UserEntity> {
+        return this.userDataSource.updateUserStatus(userId, action);
     }
 
 }

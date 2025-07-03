@@ -13,19 +13,7 @@ export class DocenteDatasourceImpl implements DocenteDatasource{
             const result = await this.db.query(
                 `
                     SELECT
-                    docente_id,
-                    nombres,
-                    apellidos,
-                    ci,
-                    genero,
-                    correo_electronico,
-                    foto_docente,
-                    fecha_nacimiento,
-                    experiencia_laboral_anios,
-                    experiencia_docente_semestres,
-                    categoria_docente_id,
-                    modalidad_ingreso_id,
-                    usuario_id
+                    *
                     FROM
                     docentes
                     WHERE
@@ -65,11 +53,12 @@ export class DocenteDatasourceImpl implements DocenteDatasource{
             ) VALUES (
               $1, $2, $3, $4
             )
-            returning *
+            RETURNING *
             `,
             [nombres,apellidos,correo_electronico,usuario_id]
            )
            const docente = result.rows[0];
+           console.log('Docente creado:', docente);
            return DocenteMapper.docenteEntityFromObject(docente)
         } catch (error) {
             if(error instanceof CustomError){

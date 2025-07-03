@@ -8,11 +8,9 @@ import { DocenteRepositoryImpl } from "../../infrastructure/repositories/docente
 import { DocenteDatasourceImpl } from "../../infrastructure/datasources/docente.datasource.impl";
 import { ResendEmailService } from "../../infrastructure/services/nodemailer.service";
 
+export class AdminRoutes {
 
-
-export class AdminRoutes{
-
-    static get routes(): Router{
+    static get routes(): Router {
         
         const router = Router()
         //
@@ -26,13 +24,17 @@ export class AdminRoutes{
         //
         const docenteRepository = new DocenteRepositoryImpl(database2);
         //
-        const controller = new AdminController(userRepository,docenteRepository,emailService);
+        const controller = new AdminController(userRepository, docenteRepository, emailService);
 
-        router.get('/users/pending',controller.getPendingUsers)
-        //
-        router.put('/users/:id/activate',controller.activateUser)
-        //
+        // Obtener usuarios pendientes
+        router.get('/users/pending', controller.getPendingUsers)
+        
+        // Aprobar usuario
+        router.put('/users/:id/approve', controller.approveUser)
+        
+        // Rechazar usuario
+        router.put('/users/:id/reject', controller.rejectUser)
+        
         return router;
     }
-
 }

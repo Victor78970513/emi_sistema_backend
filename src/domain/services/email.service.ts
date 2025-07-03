@@ -6,4 +6,6 @@ export abstract class EmailService{
     abstract requestRegistrationMail(user: UserEntity):Promise<void>;
 
     abstract sendApprovalAccountMail(sendMailTo: string, user: UserEntity):Promise<void>;
+
+    abstract sendRejectionAccountMail(userEmail: string, reason: string): Promise<void>;
 }
