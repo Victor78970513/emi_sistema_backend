@@ -1,6 +1,7 @@
 import { Request, Response } from "express"
 import { UpdateUserStatus, CustomError, DocenteRepository, GetPendingUsers, UserRepository } from "../../domain";
 import { EmailService } from "../../domain/services/email.service";
+import { SafeUserDto } from "../../domain/dtos/auth/login-user.dto";
 
 export class AdminController {
 
@@ -21,7 +22,10 @@ export class AdminController {
     getPendingUsers = (req: Request, res: Response) => {
         new GetPendingUsers(this.userRepository)
             .execute()
-            .then(data => res.json(data))
+            .then(data => {
+                const safeUsers = data.map(SafeUserDto.fromEntity);
+                res.json(safeUsers)
+            })
             .catch(error => this.handleError(error, res))
     }
 

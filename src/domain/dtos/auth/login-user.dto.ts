@@ -20,3 +20,27 @@ export class LoginUserDto{
         ];
     }
 }
+
+export class SafeUserDto {
+    constructor(
+        public id: string,
+        public nombres: string,
+        public apellidos: string,
+        public correo: string,
+        public rol_id: number,
+        public carrera_id: number,
+        public estado_id: number,
+    ) {}
+
+    static fromEntity(user: any) {
+        return new SafeUserDto(
+            user.userId || user.id,
+            user.nombres,
+            user.apellidos,
+            user.correo,
+            user.rol_id,
+            user.carrera_id,
+            user.estado_id,
+        );
+    }
+}
