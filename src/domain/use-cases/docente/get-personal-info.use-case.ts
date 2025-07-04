@@ -60,3 +60,17 @@ export class RegisterEstudioAcademico {
         return this.docenteRepository.createEstudioAcademico(dto);
     }
 }
+
+export class GetEstudiosAcademicos {
+    constructor(private readonly docenteRepository: DocenteRepository) {}
+    async execute(docenteId: number): Promise<EstudioAcademicoEntity[]> {
+        return this.docenteRepository.getEstudiosAcademicosByDocente(docenteId);
+    }
+}
+
+export class DeleteEstudioAcademico {
+    constructor(private readonly docenteRepository: DocenteRepository) {}
+    async execute(estudioId: number, docenteId: number): Promise<boolean> {
+        return this.docenteRepository.deleteEstudioAcademico(estudioId, docenteId);
+    }
+}

@@ -30,4 +30,8 @@ export class DocenteRepositoryImpl implements DocenteRepository{
     getEstudiosAcademicosByDocente(docente_id: number): Promise<EstudioAcademicoEntity[]> {
         return this.docenteDatasource.getEstudiosAcademicosByDocente(docente_id);
     }
+
+    deleteEstudioAcademico(estudioId: number, docenteId: number): Promise<boolean> {
+        return this.docenteDatasource.deleteEstudioAcademico(estudioId, docenteId);
+    }
 }

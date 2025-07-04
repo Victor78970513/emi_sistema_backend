@@ -3,6 +3,8 @@ import { CreateDocenteDto, CustomError, DocenteDatasource, DocenteEntity, Update
 import { DocenteMapper } from "../mappers/docente.mapper";
 import { CreateEstudioAcademicoDto } from "../../domain/dtos/docente/create-docente.dto";
 import { EstudioAcademicoEntity } from "../../domain/entities/docente.entity";
+import fs from 'fs';
+import path from 'path';
 
 
 export class DocenteDatasourceImpl implements DocenteDatasource{
@@ -108,5 +110,33 @@ export class DocenteDatasourceImpl implements DocenteDatasource{
             [docente_id]
         );
         return result.rows as EstudioAcademicoEntity[];
+    }
+
+    async deleteEstudioAcademico(estudioId: number, docenteId: number): Promise<boolean> {
+        // Primero obtener el estudio para verificar que pertenece al docente y obtener el nombre del archivo
+        const estudioResult = await this.db.query(
+            `SELECT * FROM estudios_academicos WHERE id = $1 AND docente_id = $2`,
+            [estudioId, docenteId]
+        );
+        
+        if (estudioResult.rows.length === 0) {
+            throw CustomError.notFound('Estudio académico no encontrado o no tienes permisos');
+        }
+        
+        const estudio = estudioResult.rows[0];
+        
+        // Eliminar el archivo físico
+        const filePath = path.join(process.cwd(), 'uploads/estudios_academicos', estudio.documento_url);
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+        }
+        
+        // Eliminar el registro de la base de datos
+        const deleteResult = await this.db.query(
+            `DELETE FROM estudios_academicos WHERE id = $1 AND docente_id = $2`,
+            [estudioId, docenteId]
+        );
+        
+        return (deleteResult.rowCount || 0) > 0;
     }
 }

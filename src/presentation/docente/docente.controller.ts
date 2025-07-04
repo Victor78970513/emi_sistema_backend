@@ -4,7 +4,7 @@ import { GetPersonalInfo } from "../../domain/use-cases/docente/get-personal-inf
 import { UpdatePersonalInfo } from "../../domain";
 import { UpdateDocenteDto } from "../../domain/dtos/docente/create-docente.dto";
 import { UploadDocentePhoto, UploadPhotoDto } from "../../domain";
-import { RegisterEstudioAcademico, CreateEstudioAcademicoDto, UploadEstudioPDFDto } from "../../domain";
+import { RegisterEstudioAcademico, CreateEstudioAcademicoDto, UploadEstudioPDFDto, GetEstudiosAcademicos, DeleteEstudioAcademico } from "../../domain";
 
 
 export class DocenteController{
@@ -157,5 +157,54 @@ export class DocenteController{
                 res.status(404).json({ error: 'Archivo no encontrado' });
             }
         });
+    }
+
+    getEstudiosAcademicos = (req: Request, res: Response): void => {
+        const payload = (req as any).user;
+        if (!payload || !payload.id) {
+            res.status(401).json({ error: 'No autorizado' });
+            return;
+        }
+
+        // Obtener el docente para obtener su ID real
+        new GetPersonalInfo(this.docenteRepository)
+            .execute(payload.id)
+            .then(docente => {
+                return new GetEstudiosAcademicos(this.docenteRepository)
+                    .execute(docente.docente_id);
+            })
+            .then(estudios => res.json(estudios))
+            .catch(error => this.handleError(error, res));
+    }
+
+    deleteEstudioAcademico = (req: Request, res: Response): void => {
+        const payload = (req as any).user;
+        const { estudioId } = req.params;
+        
+        if (!payload || !payload.id) {
+            res.status(401).json({ error: 'No autorizado' });
+            return;
+        }
+        
+        if (!estudioId) {
+            res.status(400).json({ error: 'ID del estudio es requerido' });
+            return;
+        }
+
+        // Obtener el docente para obtener su ID real
+        new GetPersonalInfo(this.docenteRepository)
+            .execute(payload.id)
+            .then(docente => {
+                return new DeleteEstudioAcademico(this.docenteRepository)
+                    .execute(Number(estudioId), docente.docente_id);
+            })
+            .then(deleted => {
+                if (deleted) {
+                    res.json({ message: 'Estudio académico eliminado correctamente' });
+                } else {
+                    res.status(404).json({ error: 'Estudio académico no encontrado' });
+                }
+            })
+            .catch(error => this.handleError(error, res));
     }
 }

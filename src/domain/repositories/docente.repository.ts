@@ -14,4 +14,5 @@ export abstract class DocenteRepository{
 
     abstract createEstudioAcademico(dto: CreateEstudioAcademicoDto): Promise<EstudioAcademicoEntity>;
     abstract getEstudiosAcademicosByDocente(docente_id: number): Promise<EstudioAcademicoEntity[]>;
+    abstract deleteEstudioAcademico(estudioId: number, docenteId: number): Promise<boolean>;
 }

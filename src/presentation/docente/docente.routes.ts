@@ -34,6 +34,8 @@ export class DocenteRoutes{
             UploadMiddleware.validatePDF, 
             controller.registerEstudioAcademico
         );
+        router.get('/estudios-academicos', AuthMiddleware.validateJWT, controller.getEstudiosAcademicos);
+        router.delete('/estudios-academicos/:estudioId', AuthMiddleware.validateJWT, controller.deleteEstudioAcademico);
         router.get('/estudios-academicos/:estudioId/pdf', controller.getEstudioPDF);
 
         return router;
