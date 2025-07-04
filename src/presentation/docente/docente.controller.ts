@@ -139,4 +139,23 @@ export class DocenteController{
             .then(data => res.json({ message: 'Estudio académico registrado', estudio: data }))
             .catch(error => this.handleError(error, res));
     }
+
+    getEstudioPDF = (req: Request, res: Response): void => {
+        const { estudioId } = req.params;
+        if (!estudioId) {
+            res.status(400).json({ error: 'ID del estudio es requerido' });
+            return;
+        }
+
+        // Aquí deberías buscar el estudio en la base de datos para obtener el nombre del archivo
+        // Por ahora, asumimos que el estudioId es el nombre del archivo
+        const filePath = `uploads/estudios_academicos/${estudioId}`;
+        
+        res.download(filePath, (err) => {
+            if (err) {
+                console.error('Error al descargar archivo:', err);
+                res.status(404).json({ error: 'Archivo no encontrado' });
+            }
+        });
+    }
 }
