@@ -25,3 +25,4 @@ export * from './use-cases/auth/register-user.use-case';
 export * from './use-cases/auth/login-user.use-case';
 export * from './use-cases/user/update-user-status.use-case';
 export * from './use-cases/user/pending-users.use-case';
+export * from './use-cases/docente/get-personal-info.use-case';

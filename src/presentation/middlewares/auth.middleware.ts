@@ -29,7 +29,7 @@ export class AuthMiddleware{
 
             // const user = await 
 
-            req.body.payload = payload;
+            (req as any).user = payload;
             next();
         } catch (error) {
             console.log(error);

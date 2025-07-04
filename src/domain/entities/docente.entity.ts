@@ -15,3 +15,17 @@ export class DocenteEntity{
     public usuario_id: number,
     ){}
 }
+
+export class EstudioAcademicoEntity {
+    constructor(
+        public id: number,
+        public docente_id: number,
+        public titulo: string,
+        public documento_url: string,
+        public institucion_id: number,
+        public grado_academico_id: number,
+        public creado_en: Date,
+        public modificado_en: Date,
+        public año_titulacion: number,
+    ) {}
+}

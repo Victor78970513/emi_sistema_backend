@@ -1,5 +1,7 @@
 import { DocenteEntity } from "../../entities/docente.entity";
 import { DocenteRepository } from "../../repositories/docente.repository";
+import { UpdateDocenteDto, UploadPhotoDto, CreateEstudioAcademicoDto, UploadEstudioPDFDto } from "../../dtos/docente/create-docente.dto";
+import { EstudioAcademicoEntity } from "../../entities/docente.entity";
 
 
 interface GetPersonalInfoUseCase{
@@ -30,5 +32,31 @@ export class GetPersonalInfo implements GetPersonalInfoUseCase{
             response.usuario_id,
         );
         return docente;
+    }
+}
+
+export class UpdatePersonalInfo {
+    constructor(private readonly docenteRepository: DocenteRepository) {}
+    async execute(docenteId: string, update: UpdateDocenteDto): Promise<DocenteEntity> {
+        return this.docenteRepository.updateDocente(docenteId, update);
+    }
+}
+
+export class UploadDocentePhoto {
+    constructor(private readonly docenteRepository: DocenteRepository) {}
+    
+    async execute(docenteId: string, photoData: UploadPhotoDto): Promise<DocenteEntity> {
+        // Actualizar solo el campo foto_docente
+        const update = new UpdateDocenteDto();
+        update.foto_docente = photoData.filename;
+        
+        return this.docenteRepository.updateDocente(docenteId, update);
+    }
+}
+
+export class RegisterEstudioAcademico {
+    constructor(private readonly docenteRepository: DocenteRepository) {}
+    async execute(dto: CreateEstudioAcademicoDto): Promise<EstudioAcademicoEntity> {
+        return this.docenteRepository.createEstudioAcademico(dto);
     }
 }

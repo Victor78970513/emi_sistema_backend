@@ -1,4 +1,6 @@
 import express, { Router } from 'express';
+import path from 'path';
+import cors from 'cors';
 
 interface Options{
     port?: number;
@@ -18,7 +20,10 @@ export class Server{
 
     async start(){
         //?Middlewares
+        console.log(__dirname)
+        this.app.use(cors());
         this.app.use(express.json());
+        this.app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
         
         //? Usar las rutas definidas
         this.app.use(this.routes);
