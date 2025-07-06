@@ -26,3 +26,7 @@ export * from './use-cases/auth/login-user.use-case';
 export * from './use-cases/user/update-user-status.use-case';
 export * from './use-cases/user/pending-users.use-case';
 export * from './use-cases/docente/get-personal-info.use-case';
+export * from './use-cases/docente/get-all-docentes.use-case';
+export * from './use-cases/docente/get-estudios-by-docente-id.use-case';
+export * from './use-cases/docente/get-instituciones.use-case';
+export * from './use-cases/docente/get-grados-academicos.use-case';

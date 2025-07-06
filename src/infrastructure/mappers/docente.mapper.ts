@@ -18,6 +18,18 @@ export class DocenteMapper{
             categoria_docente_id,
             modalidad_ingreso_id, 
             usuario_id,
+            // Campos adicionales de la consulta JOIN
+            user_nombres,
+            user_apellidos,
+            user_correo,
+            rol_id,
+            carrera_id,
+            estado_id,
+            rol_nombre,
+            carrera_nombre,
+            estado_nombre,
+            creado_en,
+            modificado_en
         } = object
 
         if(!id) throw CustomError.badRequest("Missing id");
@@ -40,6 +52,18 @@ export class DocenteMapper{
             categoria_docente_id,
             modalidad_ingreso_id, 
             usuario_id,
+            // Campos adicionales
+            user_nombres,
+            user_apellidos,
+            user_correo,
+            rol_id,
+            carrera_id,
+            estado_id,
+            rol_nombre,
+            carrera_nombre,
+            estado_nombre,
+            creado_en,
+            modificado_en
         )
     }
 

@@ -5,6 +5,7 @@ import { UpdatePersonalInfo } from "../../domain";
 import { UpdateDocenteDto } from "../../domain/dtos/docente/create-docente.dto";
 import { UploadDocentePhoto, UploadPhotoDto } from "../../domain";
 import { RegisterEstudioAcademico, CreateEstudioAcademicoDto, UploadEstudioPDFDto, GetEstudiosAcademicos, DeleteEstudioAcademico } from "../../domain";
+import { GetCarreras, GetAllDocentes, GetEstudiosByDocenteId, GetInstituciones, GetGradosAcademicos } from "../../domain";
 
 
 export class DocenteController{
@@ -99,7 +100,7 @@ export class DocenteController{
             return;
         }
         if (!req.file) {
-            res.status(400).json({ error: 'No se ha subido ningún archivo PDF' });
+            res.status(400).json({ error: 'No se ha subido ningún documento' });
             return;
         }
         
@@ -205,6 +206,54 @@ export class DocenteController{
                     res.status(404).json({ error: 'Estudio académico no encontrado' });
                 }
             })
+            .catch(error => this.handleError(error, res));
+    }
+
+    getCarreras = (req: Request, res: Response): void => {
+        new GetCarreras(this.docenteRepository)
+            .execute()
+            .then(carreras => res.json(carreras))
+            .catch(error => this.handleError(error, res));
+    }
+
+    getAllDocentes = (req: Request, res: Response): void => {
+        new GetAllDocentes(this.docenteRepository)
+            .execute()
+            .then(docentes => res.json(docentes))
+            .catch(error => this.handleError(error, res));
+    }
+
+    getEstudiosByDocenteId = (req: Request, res: Response): void => {
+        const { docenteId } = req.params;
+        
+        if (!docenteId) {
+            res.status(400).json({ error: 'ID del docente es requerido' });
+            return;
+        }
+
+        const docenteIdNumber = Number(docenteId);
+        if (isNaN(docenteIdNumber)) {
+            res.status(400).json({ error: 'ID del docente debe ser un número válido' });
+            return;
+        }
+
+        new GetEstudiosByDocenteId(this.docenteRepository)
+            .execute(docenteIdNumber)
+            .then(estudios => res.json(estudios))
+            .catch(error => this.handleError(error, res));
+    }
+
+    getGradosAcademicos = (req: Request, res: Response): void => {
+        new GetGradosAcademicos(this.docenteRepository)
+            .execute()
+            .then(grados => res.json(grados))
+            .catch(error => this.handleError(error, res));
+    }
+
+    getInstituciones = (req: Request, res: Response): void => {
+        new GetInstituciones(this.docenteRepository)
+            .execute()
+            .then(instituciones => res.json(instituciones))
             .catch(error => this.handleError(error, res));
     }
 }

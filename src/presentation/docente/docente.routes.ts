@@ -19,6 +19,10 @@ export class DocenteRoutes{
 
         const router = Router();
 
+        // Rutas dinámicas primero (para evitar conflictos)
+        router.get('/:docenteId/estudios-academicos', AuthMiddleware.validateJWT, controller.getEstudiosByDocenteId);
+        
+        // Rutas específicas después
         router.get('/personal-info', controller.getPersonalInfo);
         router.get('/me', AuthMiddleware.validateJWT, controller.getMe);
         router.put('/me', AuthMiddleware.validateJWT, controller.updateMe);
@@ -30,13 +34,17 @@ export class DocenteRoutes{
         );
         router.post('/estudios-academicos', 
             AuthMiddleware.validateJWT, 
-            UploadMiddleware.uploadEstudioPDF, 
-            UploadMiddleware.validatePDF, 
+            UploadMiddleware.uploadEstudioDocumento, 
+            UploadMiddleware.validateDocumento, 
             controller.registerEstudioAcademico
         );
         router.get('/estudios-academicos', AuthMiddleware.validateJWT, controller.getEstudiosAcademicos);
         router.delete('/estudios-academicos/:estudioId', AuthMiddleware.validateJWT, controller.deleteEstudioAcademico);
         router.get('/estudios-academicos/:estudioId/pdf', controller.getEstudioPDF);
+        router.get('/carreras', controller.getCarreras);
+        router.get('/instituciones', controller.getInstituciones);
+        router.get('/grados-academicos', controller.getGradosAcademicos);
+        router.get('/all', controller.getAllDocentes);
 
         return router;
     }

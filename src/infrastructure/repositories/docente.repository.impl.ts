@@ -2,6 +2,9 @@ import { CreateDocenteDto, DocenteDatasource, DocenteEntity, DocenteRepository }
 import { UpdateDocenteDto } from "../../domain/dtos/docente/create-docente.dto";
 import { CreateEstudioAcademicoDto } from "../../domain/dtos/docente/create-docente.dto";
 import { EstudioAcademicoEntity } from "../../domain/entities/docente.entity";
+import { CarreraEntity } from "../../domain/entities/docente.entity";
+import { InstitucionEntity } from "../../domain/entities/docente.entity";
+import { GradoAcademicoEntity } from "../../domain/entities/docente.entity";
 
 
 
@@ -19,6 +22,10 @@ export class DocenteRepositoryImpl implements DocenteRepository{
         return this.docenteDatasource.getPersonalInfo(docenteId);
     }    
 
+    getAllDocentes(): Promise<DocenteEntity[]> {
+        return this.docenteDatasource.getAllDocentes();
+    }
+
     updateDocente(docenteId: string, update: UpdateDocenteDto) {
         return this.docenteDatasource.updateDocente(docenteId, update);
     }
@@ -33,5 +40,17 @@ export class DocenteRepositoryImpl implements DocenteRepository{
 
     deleteEstudioAcademico(estudioId: number, docenteId: number): Promise<boolean> {
         return this.docenteDatasource.deleteEstudioAcademico(estudioId, docenteId);
+    }
+
+    getCarreras(): Promise<CarreraEntity[]> {
+        return this.docenteDatasource.getCarreras();
+    }
+
+    getInstituciones(): Promise<InstitucionEntity[]> {
+        return this.docenteDatasource.getInstituciones();
+    }
+
+    getGradosAcademicos(): Promise<GradoAcademicoEntity[]> {
+        return this.docenteDatasource.getGradosAcademicos();
     }
 }

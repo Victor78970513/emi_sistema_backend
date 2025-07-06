@@ -51,14 +51,21 @@ export class AdminController {
 
     rejectUser = (req: Request, res: Response) => {
         const { id } = req.params;
-        const { reason } = req.body;
+        const { reason } = req.body || {};
         console.log(`Rechazando usuario: ${id}, razón: ${reason}`)
+        
         if (!id) {
             res.status(400).json({ error: 'Falta el ID del usuario en la URL' });
             return;
         }
+        
+        if (!reason || reason.trim() === '') {
+            res.status(400).json({ error: 'Falta la razón de rechazo' });
+            return;
+        }
+        
         new UpdateUserStatus(this.userRepository, this.docenteRepository, this.emailService)
-            .execute({ userId: id, action: 'reject', reason: reason || 'Solicitud rechazada' })
+            .execute({ userId: id, action: 'reject', reason: reason })
             .then(data => res.json(data))
             .catch(error => this.handleError(error, res))
     }

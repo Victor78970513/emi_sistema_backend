@@ -2,7 +2,7 @@ import { Pool } from "pg";
 import { CreateDocenteDto, CustomError, DocenteDatasource, DocenteEntity, UpdateDocenteDto } from "../../domain";
 import { DocenteMapper } from "../mappers/docente.mapper";
 import { CreateEstudioAcademicoDto } from "../../domain/dtos/docente/create-docente.dto";
-import { EstudioAcademicoEntity } from "../../domain/entities/docente.entity";
+import { EstudioAcademicoEntity, CarreraEntity, InstitucionEntity, GradoAcademicoEntity } from "../../domain/entities/docente.entity";
 import fs from 'fs';
 import path from 'path';
 
@@ -30,6 +30,40 @@ export class DocenteDatasourceImpl implements DocenteDatasource{
             }
             const docente = result.rows[0];
             return DocenteMapper.docenteEntityFromObject(docente);
+        } catch (error) {
+            if(error instanceof CustomError){
+                throw error
+            }
+            console.log(error)
+            throw CustomError.internalServer('Internal server error');
+        }
+    }
+
+    async getAllDocentes(): Promise<DocenteEntity[]> {
+        try {
+            const result = await this.db.query(
+                `
+                    SELECT 
+                        d.*,
+                        u.nombres as user_nombres,
+                        u.apellidos as user_apellidos,
+                        u.correo as user_correo,
+                        u.rol_id,
+                        u.carrera_id,
+                        u.estado_id,
+                        r.nombre as rol_nombre,
+                        c.nombre as carrera_nombre,
+                        e.nombre as estado_nombre
+                    FROM docentes d
+                    INNER JOIN usuarios u ON d.usuario_id = u.id
+                    LEFT JOIN roles r ON u.rol_id = r.id
+                    LEFT JOIN carreras c ON u.carrera_id = c.id
+                    LEFT JOIN estados e ON u.estado_id = e.id
+                    ORDER BY d.creado_en DESC
+                `
+            );
+            
+            return result.rows.map(docente => DocenteMapper.docenteEntityFromObject(docente));
         } catch (error) {
             if(error instanceof CustomError){
                 throw error
@@ -106,7 +140,15 @@ export class DocenteDatasourceImpl implements DocenteDatasource{
 
     async getEstudiosAcademicosByDocente(docente_id: number): Promise<EstudioAcademicoEntity[]> {
         const result = await this.db.query(
-            `SELECT * FROM estudios_academicos WHERE docente_id = $1`,
+            `SELECT 
+                ea.*,
+                i.nombre as institucion_nombre,
+                ga.nombre as grado_academico_nombre
+             FROM estudios_academicos ea
+             LEFT JOIN institucion i ON ea.institucion_id = i.id
+             LEFT JOIN grado_academico ga ON ea.grado_academico_id = ga.id
+             WHERE ea.docente_id = $1
+             ORDER BY ea.creado_en DESC`,
             [docente_id]
         );
         return result.rows as EstudioAcademicoEntity[];
@@ -138,5 +180,20 @@ export class DocenteDatasourceImpl implements DocenteDatasource{
         );
         
         return (deleteResult.rowCount || 0) > 0;
+    }
+
+    async getCarreras(): Promise<CarreraEntity[]> {
+        const result = await this.db.query('SELECT id, nombre, creado_en, modificado_en FROM carreras');
+        return result.rows as CarreraEntity[];
+    }
+
+    async getInstituciones(): Promise<InstitucionEntity[]> {
+        const result = await this.db.query('SELECT id, nombre, creado_en, modificado_en FROM institucion ORDER BY nombre');
+        return result.rows as InstitucionEntity[];
+    }
+
+    async getGradosAcademicos(): Promise<GradoAcademicoEntity[]> {
+        const result = await this.db.query('SELECT id, nombre, creado_en, modificado_en FROM grado_academico ORDER BY nombre');
+        return result.rows as GradoAcademicoEntity[];
     }
 }

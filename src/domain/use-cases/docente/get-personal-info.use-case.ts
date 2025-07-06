@@ -2,6 +2,7 @@ import { DocenteEntity } from "../../entities/docente.entity";
 import { DocenteRepository } from "../../repositories/docente.repository";
 import { UpdateDocenteDto, UploadPhotoDto, CreateEstudioAcademicoDto, UploadEstudioPDFDto } from "../../dtos/docente/create-docente.dto";
 import { EstudioAcademicoEntity } from "../../entities/docente.entity";
+import { CarreraEntity } from "../../entities/docente.entity";
 
 
 interface GetPersonalInfoUseCase{
@@ -72,5 +73,12 @@ export class DeleteEstudioAcademico {
     constructor(private readonly docenteRepository: DocenteRepository) {}
     async execute(estudioId: number, docenteId: number): Promise<boolean> {
         return this.docenteRepository.deleteEstudioAcademico(estudioId, docenteId);
+    }
+}
+
+export class GetCarreras {
+    constructor(private readonly docenteRepository: DocenteRepository) {}
+    async execute(): Promise<CarreraEntity[]> {
+        return this.docenteRepository.getCarreras();
     }
 }
