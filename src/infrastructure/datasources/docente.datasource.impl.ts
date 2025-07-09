@@ -2,7 +2,7 @@ import { Pool } from "pg";
 import { CreateDocenteDto, CustomError, DocenteDatasource, DocenteEntity, UpdateDocenteDto } from "../../domain";
 import { DocenteMapper } from "../mappers/docente.mapper";
 import { CreateEstudioAcademicoDto } from "../../domain/dtos/docente/create-docente.dto";
-import { EstudioAcademicoEntity, CarreraEntity, InstitucionEntity, GradoAcademicoEntity } from "../../domain/entities/docente.entity";
+import { EstudioAcademicoEntity, CarreraEntity, InstitucionEntity, GradoAcademicoEntity, AsignaturaEntity } from "../../domain/entities/docente.entity";
 import fs from 'fs';
 import path from 'path';
 
@@ -192,8 +192,20 @@ export class DocenteDatasourceImpl implements DocenteDatasource{
         return result.rows as InstitucionEntity[];
     }
 
-    async getGradosAcademicos(): Promise<GradoAcademicoEntity[]> {
-        const result = await this.db.query('SELECT id, nombre, creado_en, modificado_en FROM grado_academico ORDER BY nombre');
-        return result.rows as GradoAcademicoEntity[];
+        async getGradosAcademicos(): Promise<GradoAcademicoEntity[]> {
+            const result = await this.db.query('SELECT id, nombre, creado_en, modificado_en FROM grado_academico ORDER BY nombre');
+            return result.rows as GradoAcademicoEntity[];
+        }
+
+    async obtenerAsignaturas(): Promise<AsignaturaEntity[]> {
+        const result = await this.db.query('SELECT * FROM asignaturas');
+        return result.rows;
     }
+
+
+    async obtenerCarreras(): Promise<CarreraEntity[]> {
+        const result = await this.db.query('SELECT * FROM carreras');
+        return result.rows;
+    }
+
 }

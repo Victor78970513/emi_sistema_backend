@@ -13,6 +13,9 @@ export class AppRoutes{
         router.use('/api/admin', AdminRoutes.routes)
         //
         router.use('/api/docente', DocenteRoutes.routes)
+        
+        router.use('/api/docente', DocenteRoutes.routes)
+
         return router;
     }
 
