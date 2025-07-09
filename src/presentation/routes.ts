@@ -2,6 +2,7 @@ import { Router } from "express";
 import { AuthRoutes } from "./auth/auth.routes";
 import { AdminRoutes } from "./admin/admin.routes";
 import { DocenteRoutes } from "./docente/docente.routes";
+import solicitudRoutes from "./solicitud/solicitud.routes";
 
 export class AppRoutes{
 
@@ -14,7 +15,7 @@ export class AppRoutes{
         //
         router.use('/api/docente', DocenteRoutes.routes)
         
-        router.use('/api/docente', DocenteRoutes.routes)
+        router.use('/api/solicitudes', solicitudRoutes);
 
         return router;
     }
