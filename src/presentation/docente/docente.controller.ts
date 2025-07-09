@@ -256,4 +256,16 @@ export class DocenteController{
             .then(instituciones => res.json(instituciones))
             .catch(error => this.handleError(error, res));
     }
+    obtenerAsignaturas = (_req: Request, res: Response): void => {
+        this.docenteRepository.obtenerAsignaturas()
+            .then(asignaturas => res.json(asignaturas))
+            .catch(error => this.handleError(error, res));
+    }
+
+    obtenerCarrerasDisponibles = (_req: Request, res: Response): void => {
+        this.docenteRepository.obtenerCarreras()
+            .then(carreras => res.json(carreras))
+            .catch(error => this.handleError(error, res));
+    }
+
 }

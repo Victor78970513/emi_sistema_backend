@@ -5,6 +5,7 @@ import { EstudioAcademicoEntity } from "../../domain/entities/docente.entity";
 import { CarreraEntity } from "../../domain/entities/docente.entity";
 import { InstitucionEntity } from "../../domain/entities/docente.entity";
 import { GradoAcademicoEntity } from "../../domain/entities/docente.entity";
+import { AsignaturaEntity } from "../../domain/entities/docente.entity";
 
 
 
@@ -53,4 +54,13 @@ export class DocenteRepositoryImpl implements DocenteRepository{
     getGradosAcademicos(): Promise<GradoAcademicoEntity[]> {
         return this.docenteDatasource.getGradosAcademicos();
     }
+
+    obtenerAsignaturas(): Promise<AsignaturaEntity[]> {
+        return this.docenteDatasource.obtenerAsignaturas();
+    }
+
+    obtenerCarreras(): Promise<CarreraEntity[]> {
+        return this.docenteDatasource.obtenerCarreras();
+    }
+
 }

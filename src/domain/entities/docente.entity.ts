@@ -71,3 +71,18 @@ export class GradoAcademicoEntity {
         public modificado_en: Date
     ) {}
 }
+
+export class AsignaturaEntity {
+  constructor(
+    public id: number,
+    public nombre: string,
+    public carrera_id: number,
+    public semestre: number,
+    public horas_teoricas: number,
+    public horas_practicas: number,
+    public horas_laboratorio: number,
+    public creado_en: Date,
+    public modificado_en: Date
+  ) {}
+}
+

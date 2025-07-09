@@ -46,6 +46,10 @@ export class DocenteRoutes{
         router.get('/grados-academicos', controller.getGradosAcademicos);
         router.get('/all', controller.getAllDocentes);
 
+        
+        router.get('/asignaturas', controller.obtenerAsignaturas);
+        router.get('/carreras-disponibles', controller.obtenerCarrerasDisponibles);
+
         return router;
     }
 

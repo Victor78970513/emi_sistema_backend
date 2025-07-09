@@ -3,10 +3,11 @@ import { DocenteEntity } from "../entities/docente.entity";
 import { UpdateDocenteDto } from "../dtos/docente/create-docente.dto";
 import { CreateEstudioAcademicoDto } from "../dtos/docente/create-docente.dto";
 import { EstudioAcademicoEntity } from "../entities/docente.entity";
-import { CarreraEntity, InstitucionEntity, GradoAcademicoEntity } from "../entities/docente.entity";
+import { CarreraEntity, InstitucionEntity, GradoAcademicoEntity,AsignaturaEntity } from "../entities/docente.entity";
 
 
 export abstract class DocenteRepository{
+
     abstract createDocente(createDocenteDto: CreateDocenteDto):Promise<DocenteEntity>
 
     abstract getPersonalInfo(docenteId:string):Promise<DocenteEntity>
@@ -24,4 +25,11 @@ export abstract class DocenteRepository{
     abstract getInstituciones(): Promise<InstitucionEntity[]>;
 
     abstract getGradosAcademicos(): Promise<GradoAcademicoEntity[]>;
+
+    abstract obtenerAsignaturas(): Promise<AsignaturaEntity[]>;
+
+
+    abstract obtenerCarreras(): Promise<CarreraEntity[]>;
+
+        
 }

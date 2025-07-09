@@ -1,5 +1,5 @@
 import { CreateDocenteDto } from "../dtos/docente/create-docente.dto";
-import { DocenteEntity } from "../entities/docente.entity";
+import { AsignaturaEntity, DocenteEntity } from "../entities/docente.entity";
 import { UpdateDocenteDto } from "../dtos/docente/create-docente.dto";
 import { CreateEstudioAcademicoDto } from "../dtos/docente/create-docente.dto";
 import { EstudioAcademicoEntity } from "../entities/docente.entity";
@@ -26,4 +26,10 @@ export abstract class DocenteDatasource{
     abstract getInstituciones(): Promise<InstitucionEntity[]>;
 
     abstract getGradosAcademicos(): Promise<GradoAcademicoEntity[]>;
+
+
+    abstract obtenerAsignaturas(): Promise<AsignaturaEntity[]>;
+    
+    abstract obtenerCarreras(): Promise<CarreraEntity[]>;
+
 }
