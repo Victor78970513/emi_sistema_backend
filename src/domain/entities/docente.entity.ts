@@ -25,6 +25,9 @@ export class DocenteEntity{
     public estado_nombre?: string,
     public creado_en?: Date,
     public modificado_en?: Date,
+    // Campos adicionales para nombres de categoría y modalidad
+    public categoria_nombre?: string,
+    public modalidad_ingreso_nombre?: string,
     ){}
 }
 

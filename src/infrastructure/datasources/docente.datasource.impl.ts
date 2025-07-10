@@ -54,12 +54,16 @@ export class DocenteDatasourceImpl implements DocenteDatasource{
                         u.estado_id,
                         r.nombre as rol_nombre,
                         c.nombre as carrera_nombre,
-                        e.nombre as estado_nombre
+                        e.nombre as estado_nombre,
+                        cat.nombre as categoria_nombre,
+                        mi.nombre as modalidad_ingreso_nombre
                     FROM docentes d
                     INNER JOIN usuarios u ON d.usuario_id = u.id
                     LEFT JOIN roles r ON u.rol_id = r.id
                     LEFT JOIN carreras c ON u.carrera_id = c.id
                     LEFT JOIN estados e ON u.estado_id = e.id
+                    LEFT JOIN categoria_docente cat ON d.categoria_docente_id = cat.id
+                    LEFT JOIN modalidades_ingreso mi ON d.modalidad_ingreso_id = mi.id
                     ORDER BY d.creado_en DESC
                 `
             );

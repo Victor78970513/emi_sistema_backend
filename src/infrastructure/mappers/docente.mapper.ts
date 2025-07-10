@@ -29,7 +29,10 @@ export class DocenteMapper{
             carrera_nombre,
             estado_nombre,
             creado_en,
-            modificado_en
+            modificado_en,
+            // Campos adicionales para nombres de categoría y modalidad
+            categoria_nombre,
+            modalidad_ingreso_nombre
         } = object
 
         if(!id) throw CustomError.badRequest("Missing id");
@@ -63,7 +66,10 @@ export class DocenteMapper{
             carrera_nombre,
             estado_nombre,
             creado_en,
-            modificado_en
+            modificado_en,
+            // Campos adicionales para nombres de categoría y modalidad
+            categoria_nombre,
+            modalidad_ingreso_nombre
         )
     }
 
