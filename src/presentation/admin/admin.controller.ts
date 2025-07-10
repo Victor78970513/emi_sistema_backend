@@ -2,6 +2,7 @@ import { Request, Response } from "express"
 import { UpdateUserStatus, CustomError, DocenteRepository, GetPendingUsers, UserRepository } from "../../domain";
 import { EmailService } from "../../domain/services/email.service";
 import { SafeUserDto } from "../../domain/dtos/auth/login-user.dto";
+import { GetAllSolicitudes, UpdateSolicitudStatus } from "../../domain";
 
 export class AdminController {
 
@@ -70,5 +71,51 @@ export class AdminController {
             .catch(error => this.handleError(error, res))
     }
 
+    // Métodos para solicitudes
+    getAllSolicitudes = (req: Request, res: Response) => {
+        new GetAllSolicitudes(this.docenteRepository)
+            .execute()
+            .then(solicitudes => res.json(solicitudes))
+            .catch(error => this.handleError(error, res))
+    }
 
+    approveSolicitud = (req: Request, res: Response) => {
+        const { id } = req.params;
+        
+        if (!id) {
+            res.status(400).json({ error: 'Falta el ID de la solicitud en la URL' });
+            return;
+        }
+        
+        // Obtener el estado_id para 'aprobada'
+        const estadoAprobadaId = 1;
+        
+        new UpdateSolicitudStatus(this.docenteRepository)
+            .execute(Number(id), estadoAprobadaId)
+            .then(solicitud => res.json({ 
+                message: 'Solicitud aprobada correctamente', 
+                solicitud 
+            }))
+            .catch(error => this.handleError(error, res))
+    }
+
+    rejectSolicitud = (req: Request, res: Response) => {
+        const { id } = req.params;
+        
+        if (!id) {
+            res.status(400).json({ error: 'Falta el ID de la solicitud en la URL' });
+            return;
+        }
+        
+        // Obtener el estado_id para 'rechazada'
+        const estadoRechazadaId = 2;
+        
+        new UpdateSolicitudStatus(this.docenteRepository)
+            .execute(Number(id), estadoRechazadaId)
+            .then(solicitud => res.json({ 
+                message: 'Solicitud rechazada correctamente', 
+                solicitud 
+            }))
+            .catch(error => this.handleError(error, res))
+    }
 }

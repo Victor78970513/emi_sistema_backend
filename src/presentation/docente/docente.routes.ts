@@ -46,6 +46,28 @@ export class DocenteRoutes{
         router.get('/grados-academicos', controller.getGradosAcademicos);
         router.get('/all', controller.getAllDocentes);
 
+        // Rutas para docentes_carreras
+        router.get('/carreras-asignadas', AuthMiddleware.validateJWT, controller.getDocenteCarreras);
+        router.post('/carreras-asignadas', AuthMiddleware.validateJWT, controller.createDocenteCarrera);
+        router.delete('/carreras-asignadas/:id', AuthMiddleware.validateJWT, controller.deleteDocenteCarrera);
+
+
+
+        // Rutas para solicitudes
+        router.post('/solicitudes', AuthMiddleware.validateJWT, controller.createSolicitud);
+        router.get('/solicitudes', AuthMiddleware.validateJWT, controller.getSolicitudesByDocente);
+
+        // Ruta para asignaturas por carreras (asignaturas disponibles para solicitar)
+        router.get('/asignaturas', AuthMiddleware.validateJWT, controller.getAsignaturasPorCarreras);
+
+        // Rutas para docentes_asignaturas (asignaturas donde el docente está directamente asignado)
+        router.post('/asignaturas-directas', AuthMiddleware.validateJWT, controller.createDocenteAsignatura);
+        router.get('/asignaturas-directas', AuthMiddleware.validateJWT, controller.getMisAsignaturas);
+        router.delete('/asignaturas-directas/:id', AuthMiddleware.validateJWT, controller.deleteDocenteAsignatura);
+
+        // Nueva ruta para asignaturas donde el docente está directamente asignado
+        router.get('/mis-asignaturas-asignadas', AuthMiddleware.validateJWT, controller.getMisAsignaturasAsignadas);
+
         return router;
     }
 

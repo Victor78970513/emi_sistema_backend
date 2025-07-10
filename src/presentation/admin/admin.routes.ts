@@ -35,6 +35,11 @@ export class AdminRoutes {
         // Rechazar usuario
         router.put('/users/:id/reject', controller.rejectUser)
         
+        // Rutas para solicitudes
+        router.get('/solicitudes', controller.getAllSolicitudes)
+        router.put('/solicitudes/:id/approve', controller.approveSolicitud)
+        router.put('/solicitudes/:id/reject', controller.rejectSolicitud)
+        
         return router;
     }
 }

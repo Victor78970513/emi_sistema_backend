@@ -6,6 +6,10 @@ import { UpdateDocenteDto } from "../../domain/dtos/docente/create-docente.dto";
 import { UploadDocentePhoto, UploadPhotoDto } from "../../domain";
 import { RegisterEstudioAcademico, CreateEstudioAcademicoDto, UploadEstudioPDFDto, GetEstudiosAcademicos, DeleteEstudioAcademico } from "../../domain";
 import { GetCarreras, GetAllDocentes, GetEstudiosByDocenteId, GetInstituciones, GetGradosAcademicos } from "../../domain";
+import { GetDocenteCarreras, CreateDocenteCarrera, DeleteDocenteCarrera } from "../../domain";
+import { GetDocenteAsignaturas } from "../../domain";
+import { CreateSolicitud, GetSolicitudesByDocente } from "../../domain";
+import { CreateDocenteAsignaturaUseCase, GetDocenteAsignaturasUseCase, DeleteDocenteAsignaturaUseCase } from "../../domain/use-cases/docente/get-personal-info.use-case";
 
 
 export class DocenteController{
@@ -223,6 +227,140 @@ export class DocenteController{
             .catch(error => this.handleError(error, res));
     }
 
+    // Métodos para docentes_carreras
+    getDocenteCarreras = (req: Request, res: Response): void => {
+        const payload = (req as any).user;
+        if (!payload || !payload.id) {
+            res.status(401).json({ error: 'No autorizado' });
+            return;
+        }
+
+        // Obtener el docente para obtener su ID real
+        new GetPersonalInfo(this.docenteRepository)
+            .execute(payload.id)
+            .then(docente => {
+                return new GetDocenteCarreras(this.docenteRepository)
+                    .execute(docente.docente_id);
+            })
+            .then(carreras => res.json(carreras))
+            .catch(error => this.handleError(error, res));
+    }
+
+    createDocenteCarrera = (req: Request, res: Response): void => {
+        const payload = (req as any).user;
+        const { carrera_id } = req.body;
+        
+        if (!payload || !payload.id) {
+            res.status(401).json({ error: 'No autorizado' });
+            return;
+        }
+
+        if (!carrera_id) {
+            res.status(400).json({ error: 'carrera_id es requerido' });
+            return;
+        }
+
+        // Obtener el docente para obtener su ID real
+        new GetPersonalInfo(this.docenteRepository)
+            .execute(payload.id)
+            .then(docente => {
+                return new CreateDocenteCarrera(this.docenteRepository)
+                    .execute({
+                        docente_id: docente.docente_id,
+                        carrera_id: Number(carrera_id)
+                    });
+            })
+            .then(docenteCarrera => res.json({ 
+                message: 'Carrera asignada correctamente', 
+                docenteCarrera 
+            }))
+            .catch(error => this.handleError(error, res));
+    }
+
+    deleteDocenteCarrera = (req: Request, res: Response): void => {
+        const { id } = req.params;
+        
+        if (!id) {
+            res.status(400).json({ error: 'ID de la relación es requerido' });
+            return;
+        }
+
+        new DeleteDocenteCarrera(this.docenteRepository)
+            .execute(Number(id))
+            .then(deleted => {
+                if (deleted) {
+                    res.json({ message: 'Relación docente-carrera eliminada correctamente' });
+                } else {
+                    res.status(404).json({ error: 'Relación docente-carrera no encontrada' });
+                }
+            })
+            .catch(error => this.handleError(error, res));
+    }
+
+
+
+    // Métodos para solicitudes
+    createSolicitud = (req: Request, res: Response): void => {
+        const payload = (req as any).user;
+        const { tipo_solicitud, carrera_id, asignatura_id } = req.body;
+        
+        if (!payload || !payload.id) {
+            res.status(401).json({ error: 'No autorizado' });
+            return;
+        }
+
+        if (!tipo_solicitud) {
+            res.status(400).json({ error: 'tipo_solicitud es requerido' });
+            return;
+        }
+
+        if (tipo_solicitud === 'carrera' && !carrera_id) {
+            res.status(400).json({ error: 'carrera_id es requerido para solicitudes de carrera' });
+            return;
+        }
+
+        if (tipo_solicitud === 'asignatura' && !asignatura_id) {
+            res.status(400).json({ error: 'asignatura_id es requerido para solicitudes de asignatura' });
+            return;
+        }
+
+        // Obtener el docente para obtener su ID real
+        new GetPersonalInfo(this.docenteRepository)
+            .execute(payload.id)
+            .then(docente => {
+                return new CreateSolicitud(this.docenteRepository)
+                    .execute({
+                        docente_id: docente.docente_id,
+                        tipo_solicitud,
+                        carrera_id: carrera_id ? Number(carrera_id) : null,
+                        asignatura_id: asignatura_id ? Number(asignatura_id) : null
+                    });
+            })
+            .then(solicitud => res.json({ 
+                message: 'Solicitud creada correctamente', 
+                solicitud 
+            }))
+            .catch(error => this.handleError(error, res));
+    }
+
+    getSolicitudesByDocente = (req: Request, res: Response): void => {
+        const payload = (req as any).user;
+        if (!payload || !payload.id) {
+            res.status(401).json({ error: 'No autorizado' });
+            return;
+        }
+
+        // Obtener el docente para obtener su ID real
+        new GetPersonalInfo(this.docenteRepository)
+            .execute(payload.id)
+            .then(docente => {
+                return new GetSolicitudesByDocente(this.docenteRepository)
+                    .execute(docente.docente_id);
+            })
+            .then(solicitudes => res.json(solicitudes))
+            .catch(error => this.handleError(error, res));
+    }
+
     getEstudiosByDocenteId = (req: Request, res: Response): void => {
         const { docenteId } = req.params;
         
@@ -253,7 +391,115 @@ export class DocenteController{
     getInstituciones = (req: Request, res: Response): void => {
         new GetInstituciones(this.docenteRepository)
             .execute()
-            .then(instituciones => res.json(instituciones))
+            .then(data => res.json(data))
+            .catch(error => this.handleError(error, res));
+    }
+
+    // Método para obtener asignaturas por carreras donde el docente está asociado
+    getAsignaturasPorCarreras = (req: Request, res: Response): void => {
+        const payload = (req as any).user;
+        if (!payload || !payload.id) {
+            res.status(401).json({ error: 'No autorizado' });
+            return;
+        }
+
+        // Obtener el docente para obtener su ID real
+        new GetPersonalInfo(this.docenteRepository)
+            .execute(payload.id)
+            .then(docente => {
+                return new GetDocenteAsignaturas(this.docenteRepository)
+                    .execute(docente.docente_id);
+            })
+            .then(data => res.json(data))
+            .catch(error => this.handleError(error, res));
+    }
+
+    // Métodos para docentes_asignaturas
+    createDocenteAsignatura = (req: Request, res: Response): void => {
+        const payload = (req as any).user;
+        if (!payload || !payload.id) {
+            res.status(401).json({ error: 'No autorizado' });
+            return;
+        }
+
+        const { asignatura_id } = req.body;
+        if (!asignatura_id) {
+            res.status(400).json({ error: 'asignatura_id es requerido' });
+            return;
+        }
+
+        // Obtener el docente para obtener su ID real
+        new GetPersonalInfo(this.docenteRepository)
+            .execute(payload.id)
+            .then(docente => {
+                const dto = { docente_id: docente.docente_id, asignatura_id: Number(asignatura_id) };
+                return new CreateDocenteAsignaturaUseCase(this.docenteRepository)
+                    .execute(dto);
+            })
+            .then(data => res.status(201).json(data))
+            .catch(error => this.handleError(error, res));
+    }
+
+    getMisAsignaturas = (req: Request, res: Response): void => {
+        const payload = (req as any).user;
+        if (!payload || !payload.id) {
+            res.status(401).json({ error: 'No autorizado' });
+            return;
+        }
+
+        // Obtener el docente para obtener su ID real
+        new GetPersonalInfo(this.docenteRepository)
+            .execute(payload.id)
+            .then(docente => {
+                return new GetDocenteAsignaturasUseCase(this.docenteRepository)
+                    .execute(docente.docente_id);
+            })
+            .then(data => res.json(data))
+            .catch(error => this.handleError(error, res));
+    }
+
+    deleteDocenteAsignatura = (req: Request, res: Response): void => {
+        const payload = (req as any).user;
+        const { id } = req.params;
+        
+        if (!payload || !payload.id) {
+            res.status(401).json({ error: 'No autorizado' });
+            return;
+        }
+        
+        if (!id) {
+            res.status(400).json({ error: 'ID de la relación es requerido' });
+            return;
+        }
+
+        new DeleteDocenteAsignaturaUseCase(this.docenteRepository)
+            .execute(Number(id))
+            .then(deleted => {
+                if (deleted) {
+                    res.status(200).json({ message: 'Relación docente-asignatura eliminada exitosamente' });
+                } else {
+                    res.status(404).json({ message: 'Relación docente-asignatura no encontrada' });
+                }
+            })
+            .catch(error => this.handleError(error, res));
+    }
+
+    // Nuevo método para obtener asignaturas donde el docente está directamente asignado
+    getMisAsignaturasAsignadas = (req: Request, res: Response): void => {
+        const payload = (req as any).user;
+        if (!payload || !payload.id) {
+            res.status(401).json({ error: 'No autorizado' });
+            return;
+        }
+
+        // Obtener el docente para obtener su ID real
+        new GetPersonalInfo(this.docenteRepository)
+            .execute(payload.id)
+            .then(docente => {
+                return new GetDocenteAsignaturasUseCase(this.docenteRepository)
+                    .execute(docente.docente_id);
+            })
+            .then(data => res.json(data))
             .catch(error => this.handleError(error, res));
     }
 }

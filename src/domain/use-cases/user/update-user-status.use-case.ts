@@ -43,7 +43,8 @@ export class UpdateUserStatus implements UpdateUserStatusUseCase {
             // Aquí deberías verificar si el rol_id corresponde a un docente
             // Por ahora, asumimos que si tiene carrera_id, es un docente
             if (updatedUser.carrera_id) {
-                await this.docenteRepository.createDocente({
+                // Crear el registro de docente
+                const docente = await this.docenteRepository.createDocente({
                     nombres: updatedUser.nombres,
                     apellidos: updatedUser.apellidos,
                     correo_electronico: updatedUser.correo,
@@ -56,6 +57,12 @@ export class UpdateUserStatus implements UpdateUserStatusUseCase {
                     experiencia_academica: null,
                     categoria_docente_id: null,
                     modalidad_ingreso_id: null,
+                });
+
+                // Crear la relación docente-carrera
+                await this.docenteRepository.createDocenteCarrera({
+                    docente_id: docente.docente_id,
+                    carrera_id: updatedUser.carrera_id,
                 });
             }
             

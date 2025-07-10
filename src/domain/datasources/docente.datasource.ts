@@ -3,7 +3,8 @@ import { DocenteEntity } from "../entities/docente.entity";
 import { UpdateDocenteDto } from "../dtos/docente/create-docente.dto";
 import { CreateEstudioAcademicoDto } from "../dtos/docente/create-docente.dto";
 import { EstudioAcademicoEntity } from "../entities/docente.entity";
-import { CarreraEntity, InstitucionEntity, GradoAcademicoEntity } from "../entities/docente.entity";
+import { CarreraEntity, InstitucionEntity, GradoAcademicoEntity, DocenteCarreraEntity, AsignaturaEntity, SolicitudEntity, DocenteAsignaturaEntity } from "../entities/docente.entity";
+import { CreateDocenteCarreraDto, CreateSolicitudDto, CreateDocenteAsignaturaDto } from "../dtos/docente/create-docente.dto";
 
 
 export abstract class DocenteDatasource{
@@ -26,4 +27,23 @@ export abstract class DocenteDatasource{
     abstract getInstituciones(): Promise<InstitucionEntity[]>;
 
     abstract getGradosAcademicos(): Promise<GradoAcademicoEntity[]>;
+
+    // Métodos para docentes_carreras
+    abstract createDocenteCarrera(dto: CreateDocenteCarreraDto): Promise<DocenteCarreraEntity>;
+    abstract getDocenteCarreras(docente_id: number): Promise<DocenteCarreraEntity[]>;
+    abstract deleteDocenteCarrera(id: number): Promise<boolean>;
+
+    // Métodos para asignaturas
+    abstract getAsignaturasByCarreras(carreraIds: number[]): Promise<AsignaturaEntity[]>;
+
+    // Métodos para solicitudes
+    abstract createSolicitud(dto: CreateSolicitudDto): Promise<SolicitudEntity>;
+    abstract getSolicitudesByDocente(docente_id: number): Promise<SolicitudEntity[]>;
+    abstract getAllSolicitudes(): Promise<SolicitudEntity[]>;
+    abstract updateSolicitudStatus(id: number, estado_id: number): Promise<SolicitudEntity>;
+
+    // Métodos para docentes_asignaturas
+    abstract createDocenteAsignatura(dto: CreateDocenteAsignaturaDto): Promise<DocenteAsignaturaEntity>;
+    abstract getDocenteAsignaturas(docente_id: number): Promise<DocenteAsignaturaEntity[]>;
+    abstract deleteDocenteAsignatura(id: number): Promise<boolean>;
 }

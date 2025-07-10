@@ -71,3 +71,68 @@ export class GradoAcademicoEntity {
         public modificado_en: Date
     ) {}
 }
+
+export class DocenteCarreraEntity {
+    constructor(
+        public id: number,
+        public docente_id: number,
+        public carrera_id: number,
+        public creado_en: Date,
+        public modificado_en: Date,
+        // Campos adicionales para nombres
+        public docente_nombre?: string,
+        public carrera_nombre?: string,
+    ) {}
+}
+
+export class AsignaturaEntity {
+    constructor(
+        public id: number,
+        public gestion: number,
+        public periodo: string,
+        public materia: string,
+        public sem: number,
+        public semestres: string,
+        public carga_horaria: number,
+        public carrera_id: number,
+        public creado_en: Date,
+        public modificado_en: Date,
+        // Campos adicionales para nombres
+        public carrera_nombre?: string,
+    ) {}
+}
+
+export class SolicitudEntity {
+    constructor(
+        public id: number,
+        public docente_id: number,
+        public tipo_solicitud: 'carrera' | 'asignatura',
+        public carrera_id: number | null,
+        public asignatura_id: number | null,
+        public estado_id: number,
+        public creado_en: Date,
+        public modificado_en: Date,
+        // Campos adicionales para nombres
+        public docente_nombre?: string,
+        public carrera_nombre?: string,
+        public asignatura_nombre?: string,
+        public estado_nombre?: string,
+    ) {}
+}
+
+export class DocenteAsignaturaEntity {
+    constructor(
+        public id: number,
+        public docente_id: number,
+        public asignatura_id: number,
+        public creado_en: Date,
+        public modificado_en: Date,
+        // Campos adicionales para nombres
+        public docente_nombre?: string,
+        public asignatura_nombre?: string,
+        // Campos adicionales de la asignatura
+        public gestion?: number,
+        public periodo?: string,
+        public semestres?: string,
+    ) {}
+}

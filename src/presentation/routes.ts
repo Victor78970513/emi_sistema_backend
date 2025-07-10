@@ -8,6 +8,9 @@ export class AppRoutes{
     static get routes(): Router{
         const router = Router();
         //! Definir todas mis rutas principales
+        router.get('/', (req, res) => {
+            res.json({ mensaje: 'Hola mundo' });
+        });
         router.use('/api/auth', AuthRoutes.routes)
         //
         router.use('/api/admin', AdminRoutes.routes)

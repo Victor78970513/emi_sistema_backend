@@ -5,7 +5,13 @@ import { EstudioAcademicoEntity } from "../../domain/entities/docente.entity";
 import { CarreraEntity } from "../../domain/entities/docente.entity";
 import { InstitucionEntity } from "../../domain/entities/docente.entity";
 import { GradoAcademicoEntity } from "../../domain/entities/docente.entity";
-
+import { DocenteCarreraEntity } from "../../domain/entities/docente.entity";
+import { CreateDocenteCarreraDto } from "../../domain/dtos/docente/create-docente.dto";
+import { AsignaturaEntity } from "../../domain/entities/docente.entity";
+import { SolicitudEntity } from "../../domain/entities/docente.entity";
+import { CreateSolicitudDto } from "../../domain/dtos/docente/create-docente.dto";
+import { DocenteAsignaturaEntity } from "../../domain/entities/docente.entity";
+import { CreateDocenteAsignaturaDto } from "../../domain/dtos/docente/create-docente.dto";
 
 
 export class DocenteRepositoryImpl implements DocenteRepository{
@@ -52,5 +58,53 @@ export class DocenteRepositoryImpl implements DocenteRepository{
 
     getGradosAcademicos(): Promise<GradoAcademicoEntity[]> {
         return this.docenteDatasource.getGradosAcademicos();
+    }
+
+    // Métodos para docentes_carreras
+    createDocenteCarrera(dto: CreateDocenteCarreraDto): Promise<DocenteCarreraEntity> {
+        return this.docenteDatasource.createDocenteCarrera(dto);
+    }
+
+    getDocenteCarreras(docente_id: number): Promise<DocenteCarreraEntity[]> {
+        return this.docenteDatasource.getDocenteCarreras(docente_id);
+    }
+
+    deleteDocenteCarrera(id: number): Promise<boolean> {
+        return this.docenteDatasource.deleteDocenteCarrera(id);
+    }
+
+    // Métodos para asignaturas
+    getAsignaturasByCarreras(carreraIds: number[]): Promise<AsignaturaEntity[]> {
+        return this.docenteDatasource.getAsignaturasByCarreras(carreraIds);
+    }
+
+    // Métodos para solicitudes
+    createSolicitud(dto: CreateSolicitudDto): Promise<SolicitudEntity> {
+        return this.docenteDatasource.createSolicitud(dto);
+    }
+
+    getSolicitudesByDocente(docente_id: number): Promise<SolicitudEntity[]> {
+        return this.docenteDatasource.getSolicitudesByDocente(docente_id);
+    }
+
+    getAllSolicitudes(): Promise<SolicitudEntity[]> {
+        return this.docenteDatasource.getAllSolicitudes();
+    }
+
+    updateSolicitudStatus(id: number, estado_id: number): Promise<SolicitudEntity> {
+        return this.docenteDatasource.updateSolicitudStatus(id, estado_id);
+    }
+
+    // Métodos para docentes_asignaturas
+    createDocenteAsignatura(dto: CreateDocenteAsignaturaDto): Promise<DocenteAsignaturaEntity> {
+        return this.docenteDatasource.createDocenteAsignatura(dto);
+    }
+
+    getDocenteAsignaturas(docente_id: number): Promise<DocenteAsignaturaEntity[]> {
+        return this.docenteDatasource.getDocenteAsignaturas(docente_id);
+    }
+
+    deleteDocenteAsignatura(id: number): Promise<boolean> {
+        return this.docenteDatasource.deleteDocenteAsignatura(id);
     }
 }

@@ -3,6 +3,15 @@ import { DocenteRepository } from "../../repositories/docente.repository";
 import { UpdateDocenteDto, UploadPhotoDto, CreateEstudioAcademicoDto, UploadEstudioPDFDto } from "../../dtos/docente/create-docente.dto";
 import { EstudioAcademicoEntity } from "../../entities/docente.entity";
 import { CarreraEntity } from "../../entities/docente.entity";
+import { InstitucionEntity } from "../../entities/docente.entity";
+import { GradoAcademicoEntity } from "../../entities/docente.entity";
+import { DocenteCarreraEntity } from "../../entities/docente.entity";
+import { CreateDocenteCarreraDto } from "../../dtos/docente/create-docente.dto";
+import { AsignaturaEntity } from "../../entities/docente.entity";
+import { SolicitudEntity } from "../../entities/docente.entity";
+import { CreateSolicitudDto } from "../../dtos/docente/create-docente.dto";
+import { DocenteAsignaturaEntity } from "../../entities/docente.entity";
+import { CreateDocenteAsignaturaDto } from "../../dtos/docente/create-docente.dto";
 
 
 interface GetPersonalInfoUseCase{
@@ -80,5 +89,38 @@ export class GetCarreras {
     constructor(private readonly docenteRepository: DocenteRepository) {}
     async execute(): Promise<CarreraEntity[]> {
         return this.docenteRepository.getCarreras();
+    }
+}
+
+export class UpdateSolicitudStatusUseCase {
+    constructor(private readonly docenteRepository: DocenteRepository) {}
+
+    async execute(id: number, estado_id: number): Promise<SolicitudEntity> {
+        return await this.docenteRepository.updateSolicitudStatus(id, estado_id);
+    }
+}
+
+// Casos de uso para docentes_asignaturas
+export class CreateDocenteAsignaturaUseCase {
+    constructor(private readonly docenteRepository: DocenteRepository) {}
+
+    async execute(dto: CreateDocenteAsignaturaDto): Promise<DocenteAsignaturaEntity> {
+        return await this.docenteRepository.createDocenteAsignatura(dto);
+    }
+}
+
+export class GetDocenteAsignaturasUseCase {
+    constructor(private readonly docenteRepository: DocenteRepository) {}
+
+    async execute(docente_id: number): Promise<DocenteAsignaturaEntity[]> {
+        return await this.docenteRepository.getDocenteAsignaturas(docente_id);
+    }
+}
+
+export class DeleteDocenteAsignaturaUseCase {
+    constructor(private readonly docenteRepository: DocenteRepository) {}
+
+    async execute(id: number): Promise<boolean> {
+        return await this.docenteRepository.deleteDocenteAsignatura(id);
     }
 }

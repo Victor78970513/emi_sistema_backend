@@ -63,3 +63,26 @@ export class UploadEstudioPDFDto {
         public path: string
     ) {}
 }
+
+export class CreateDocenteCarreraDto {
+    constructor(
+        public docente_id: number,
+        public carrera_id: number,
+    ) {}
+}
+
+export class CreateSolicitudDto {
+    constructor(
+        public docente_id: number,
+        public tipo_solicitud: 'carrera' | 'asignatura',
+        public carrera_id: number | null,
+        public asignatura_id: number | null,
+    ) {}
+}
+
+export class CreateDocenteAsignaturaDto {
+    constructor(
+        public docente_id: number,
+        public asignatura_id: number,
+    ) {}
+}

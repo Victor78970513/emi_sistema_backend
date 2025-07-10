@@ -2,6 +2,7 @@ import { BcryptAdapter, JwtAdapter } from "../../config";
 import { AuthDatasource, CustomError, LoginUserDto, RegisterUserDto, UserEntity } from "../../domain";
 import { Pool } from "pg";
 import { UserMapper } from "../mappers/user.mapper";
+import { Console } from "console";
 
 type HashFunction = (password: string) => string
 type CompareFunction = (password: string, hashed: string) => boolean
@@ -81,6 +82,8 @@ export class AuthDatasourceImpl implements AuthDatasource {
             const user = result.rows[0];
 
             // 3. Comparar contraseña
+            console.log(user.contraseña)
+            console.log(contraseña)
             const isMatch = this.comparePassword(contraseña, user.contraseña);
 
             if (!isMatch) {
