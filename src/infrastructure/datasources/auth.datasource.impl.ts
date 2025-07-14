@@ -46,7 +46,7 @@ export class AuthDatasourceImpl implements AuthDatasource {
             // 4. Insertar usuario
             const result = await this.db.query(
                 `INSERT INTO usuarios(nombres, apellidos, correo, contraseña, rol_id, carrera_id, estado_id)
-                 VALUES($1, $2, $3, $4, $5, $6, $7)
+                 VALUES(UPPER($1), UPPER($2), $3, $4, $5, $6, $7)
                  RETURNING id, nombres, apellidos, correo, contraseña, rol_id, carrera_id, estado_id`,
                 [nombres, apellidos, correo, hashedPassword, rol_id, carrera_id, estado_id]
             );

@@ -32,6 +32,10 @@ export class DocenteRepositoryImpl implements DocenteRepository{
         return this.docenteDatasource.getAllDocentes();
     }
 
+    getDocenteById(docenteId: number): Promise<DocenteEntity> {
+        return this.docenteDatasource.getDocenteById(docenteId);
+    }
+
     updateDocente(docenteId: string, update: UpdateDocenteDto) {
         return this.docenteDatasource.updateDocente(docenteId, update);
     }
@@ -87,12 +91,16 @@ export class DocenteRepositoryImpl implements DocenteRepository{
         return this.docenteDatasource.getSolicitudesByDocente(docente_id);
     }
 
+    getSolicitudesPendientesByDocente(docente_id: number): Promise<SolicitudEntity[]> {
+        return this.docenteDatasource.getSolicitudesPendientesByDocente(docente_id);
+    }
+
     getAllSolicitudes(): Promise<SolicitudEntity[]> {
         return this.docenteDatasource.getAllSolicitudes();
     }
 
-    updateSolicitudStatus(id: number, estado_id: number): Promise<SolicitudEntity> {
-        return this.docenteDatasource.updateSolicitudStatus(id, estado_id);
+    updateSolicitudStatus(id: number, estado_id: number, motivo_rechazo?: string): Promise<SolicitudEntity> {
+        return this.docenteDatasource.updateSolicitudStatus(id, estado_id, motivo_rechazo);
     }
 
     // Métodos para docentes_asignaturas
@@ -106,5 +114,26 @@ export class DocenteRepositoryImpl implements DocenteRepository{
 
     deleteDocenteAsignatura(id: number): Promise<boolean> {
         return this.docenteDatasource.deleteDocenteAsignatura(id);
+    }
+
+    deleteDocenteAsignaturaByAsignaturaAndDocente(asignatura_id: number, docente_id: number): Promise<boolean> {
+        return this.docenteDatasource.deleteDocenteAsignaturaByAsignaturaAndDocente(asignatura_id, docente_id);
+    }
+
+    // Métodos para admin - asignaturas
+    async getAllAsignaturasByCarreras(): Promise<any[]> {
+        return await this.docenteDatasource.getAllAsignaturasByCarreras();
+    }
+
+    async getAsignaturaById(asignatura_id: number): Promise<any> {
+        return await this.docenteDatasource.getAsignaturaById(asignatura_id);
+    }
+
+    async getDocentesByAsignatura(asignatura_id: number): Promise<any> {
+        return await this.docenteDatasource.getDocentesByAsignatura(asignatura_id);
+    }
+
+    async getAsignaturasByCarrera(carrera_id: number): Promise<any> {
+        return await this.docenteDatasource.getAsignaturasByCarrera(carrera_id);
     }
 }

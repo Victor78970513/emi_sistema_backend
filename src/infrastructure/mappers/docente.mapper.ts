@@ -1,4 +1,4 @@
-import { CustomError, DocenteEntity } from "../../domain"
+import { CustomError, DocenteEntity, AsignaturaEntity } from "../../domain"
 
 
 export class DocenteMapper{
@@ -70,6 +70,42 @@ export class DocenteMapper{
             // Campos adicionales para nombres de categoría y modalidad
             categoria_nombre,
             modalidad_ingreso_nombre
+        )
+    }
+
+    static asignaturaEntityFromObject(object: {[key: string]: any}): AsignaturaEntity {
+        const {
+            id,
+            gestion,
+            periodo,
+            materia,
+            sem,
+            semestres,
+            carga_horaria,
+            carrera_id,
+            creado_en,
+            modificado_en,
+            carrera_nombre,
+            docentes_asociados
+        } = object
+
+        if(!id) throw CustomError.badRequest("Missing id");
+        if(!materia) throw CustomError.badRequest("Missing materia");
+        if(!carrera_id) throw CustomError.badRequest("Missing carrera_id");
+
+        return new AsignaturaEntity(
+            id,
+            gestion,
+            periodo,
+            materia,
+            sem,
+            semestres,
+            carga_horaria,
+            carrera_id,
+            creado_en,
+            modificado_en,
+            carrera_nombre,
+            docentes_asociados
         )
     }
 

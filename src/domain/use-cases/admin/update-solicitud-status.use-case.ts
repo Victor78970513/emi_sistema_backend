@@ -2,7 +2,7 @@ import { DocenteRepository } from "../../repositories/docente.repository";
 import { SolicitudEntity } from "../../entities/docente.entity";
 
 interface UpdateSolicitudStatusUseCase {
-    execute(id: number, estado_id: number): Promise<SolicitudEntity>;
+    execute(id: number, estado_id: number, motivo_rechazo?: string): Promise<SolicitudEntity>;
 }
 
 export class UpdateSolicitudStatus implements UpdateSolicitudStatusUseCase {
@@ -10,7 +10,7 @@ export class UpdateSolicitudStatus implements UpdateSolicitudStatusUseCase {
         private readonly docenteRepository: DocenteRepository,
     ) {}
 
-    async execute(id: number, estado_id: number): Promise<SolicitudEntity> {
-        return await this.docenteRepository.updateSolicitudStatus(id, estado_id);
+    async execute(id: number, estado_id: number, motivo_rechazo?: string): Promise<SolicitudEntity> {
+        return await this.docenteRepository.updateSolicitudStatus(id, estado_id, motivo_rechazo);
     }
 } 

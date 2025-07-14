@@ -40,6 +40,21 @@ export class AdminRoutes {
         router.put('/solicitudes/:id/approve', controller.approveSolicitud)
         router.put('/solicitudes/:id/reject', controller.rejectSolicitud)
         
+        // Rutas para asignaturas
+        router.get('/asignaturas', controller.getAllAsignaturasByCarreras)
+        router.get('/asignaturas/:id', controller.getAsignaturaById)
+        router.get('/asignaturas/:id/docentes', controller.getDocentesByAsignatura)
+        
+        // Rutas para asociar/desasociar docentes de asignaturas
+        router.post('/asignaturas/:id/docentes', controller.associateDocenteAsignatura)
+        router.delete('/asignaturas/:id/docentes/:docenteId', controller.disassociateDocenteAsignatura)
+        
+        // Rutas para docentes
+        router.get('/docentes/:id', controller.getDocenteById)
+        
+        // Rutas para PDFs
+        router.get('/carreras/:carreraId/asignaturas/pdf', controller.downloadAsignaturasPDF)
+        
         return router;
     }
 }

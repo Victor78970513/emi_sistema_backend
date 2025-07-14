@@ -10,6 +10,7 @@ import { GetDocenteCarreras, CreateDocenteCarrera, DeleteDocenteCarrera } from "
 import { GetDocenteAsignaturas } from "../../domain";
 import { CreateSolicitud, GetSolicitudesByDocente } from "../../domain";
 import { CreateDocenteAsignaturaUseCase, GetDocenteAsignaturasUseCase, DeleteDocenteAsignaturaUseCase } from "../../domain/use-cases/docente/get-personal-info.use-case";
+import { GetSolicitudesPendientesByDocente } from "../../domain/use-cases/docente/get-solicitudes-pendientes-by-docente.use-case";
 
 
 export class DocenteController{
@@ -500,6 +501,25 @@ export class DocenteController{
                     .execute(docente.docente_id);
             })
             .then(data => res.json(data))
+            .catch(error => this.handleError(error, res));
+    }
+
+    // Método para obtener solicitudes pendientes del docente
+    getSolicitudesPendientesByDocente = (req: Request, res: Response): void => {
+        const payload = (req as any).user;
+        if (!payload || !payload.id) {
+            res.status(401).json({ error: 'No autorizado' });
+            return;
+        }
+
+        // Obtener el docente para obtener su ID real
+        new GetPersonalInfo(this.docenteRepository)
+            .execute(payload.id)
+            .then(docente => {
+                return new GetSolicitudesPendientesByDocente(this.docenteRepository)
+                    .execute(docente.docente_id);
+            })
+            .then(solicitudes => res.json(solicitudes))
             .catch(error => this.handleError(error, res));
     }
 }

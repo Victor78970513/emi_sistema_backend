@@ -24,7 +24,7 @@ async function main(){
 
     await pool.connect()
     new Server({
-        port: envs.PORT,
+        port: envs.PORT || 3000,
         routes: AppRoutes.routes,
     }).start();
 }

@@ -78,6 +78,49 @@ export class DocenteDatasourceImpl implements DocenteDatasource{
         }
     }
 
+    async getDocenteById(docenteId: number): Promise<DocenteEntity> {
+        try {
+            const result = await this.db.query(
+                `
+                    SELECT 
+                        d.*,
+                        u.nombres as user_nombres,
+                        u.apellidos as user_apellidos,
+                        u.correo as user_correo,
+                        u.rol_id,
+                        u.carrera_id,
+                        u.estado_id,
+                        r.nombre as rol_nombre,
+                        c.nombre as carrera_nombre,
+                        e.nombre as estado_nombre,
+                        cat.nombre as categoria_nombre,
+                        mi.nombre as modalidad_ingreso_nombre
+                    FROM docentes d
+                    INNER JOIN usuarios u ON d.usuario_id = u.id
+                    LEFT JOIN roles r ON u.rol_id = r.id
+                    LEFT JOIN carreras c ON u.carrera_id = c.id
+                    LEFT JOIN estados e ON u.estado_id = e.id
+                    LEFT JOIN categoria_docente cat ON d.categoria_docente_id = cat.id
+                    LEFT JOIN modalidades_ingreso mi ON d.modalidad_ingreso_id = mi.id
+                    WHERE d.id = $1
+                `,
+                [docenteId]
+            );
+            
+            if (result.rows.length === 0) {
+                throw CustomError.notFound('Docente no encontrado');
+            }
+            
+            return DocenteMapper.docenteEntityFromObject(result.rows[0]);
+        } catch (error) {
+            if(error instanceof CustomError){
+                throw error
+            }
+            console.log(error)
+            throw CustomError.internalServer('Internal server error');
+        }
+    }
+
     async createDocente(createDocenteDto: CreateDocenteDto): Promise<DocenteEntity> {
         const {
             nombres, 
@@ -94,7 +137,7 @@ export class DocenteDatasourceImpl implements DocenteDatasource{
                 correo_electronico,
                 usuario_id
             ) VALUES (
-              $1, $2, $3, $4
+              UPPER($1), UPPER($2), $3, $4
             )
             RETURNING *
             `,
@@ -389,6 +432,27 @@ export class DocenteDatasourceImpl implements DocenteDatasource{
                 }
             }
 
+            // Verificar que el docente no esté ya asociado a la carrera/asignatura
+            if (tipo_solicitud === 'carrera' && carrera_id) {
+                const carreraAsociadaResult = await this.db.query(
+                    'SELECT id FROM docentes_carreras WHERE docente_id = $1 AND carrera_id = $2',
+                    [docente_id, carrera_id]
+                );
+                if (carreraAsociadaResult.rows.length > 0) {
+                    throw CustomError.badRequest('El docente ya está asociado a esta carrera');
+                }
+            }
+
+            if (tipo_solicitud === 'asignatura' && asignatura_id) {
+                const asignaturaAsociadaResult = await this.db.query(
+                    'SELECT id FROM docentes_asignaturas WHERE docente_id = $1 AND asignatura_id = $2',
+                    [docente_id, asignatura_id]
+                );
+                if (asignaturaAsociadaResult.rows.length > 0) {
+                    throw CustomError.badRequest('El docente ya está asociado a esta asignatura');
+                }
+            }
+
             // Verificar que no existe una solicitud pendiente similar
             const existingResult = await this.db.query(
                 `SELECT id FROM solicitudes 
@@ -397,7 +461,7 @@ export class DocenteDatasourceImpl implements DocenteDatasource{
                 [docente_id, tipo_solicitud, carrera_id, asignatura_id]
             );
             if (existingResult.rows.length > 0) {
-                throw CustomError.badRequest('Ya existe una solicitud pendiente similar');
+                throw CustomError.badRequest('Ya existe una solicitud pendiente para esta carrera/asignatura');
             }
 
             // Obtener el estado_id para 'pendiente'
@@ -411,7 +475,26 @@ export class DocenteDatasourceImpl implements DocenteDatasource{
             );
             
             const solicitud = result.rows[0];
-            return this.mapSolicitud(solicitud);
+            
+            // Obtener información adicional del docente y relacionados
+            const solicitudCompleta = await this.db.query(
+                `SELECT 
+                    s.*,
+                    d.nombres as docente_nombre,
+                    d.apellidos as docente_apellidos,
+                    c.nombre as carrera_nombre,
+                    a.materia as asignatura_nombre,
+                    e.nombre as estado_nombre
+                 FROM solicitudes s
+                 INNER JOIN docentes d ON s.docente_id = d.id
+                 LEFT JOIN carreras c ON s.carrera_id = c.id
+                 LEFT JOIN asignaturas a ON s.asignatura_id = a.id
+                 LEFT JOIN estados e ON s.estado_id = e.id
+                 WHERE s.id = $1`,
+                [solicitud.id]
+            );
+            
+            return this.mapSolicitud(solicitudCompleta.rows[0]);
         } catch (error) {
             if (error instanceof CustomError) {
                 throw error;
@@ -427,6 +510,7 @@ export class DocenteDatasourceImpl implements DocenteDatasource{
                 `SELECT 
                     s.*,
                     d.nombres as docente_nombre,
+                    d.apellidos as docente_apellidos,
                     c.nombre as carrera_nombre,
                     a.materia as asignatura_nombre,
                     e.nombre as estado_nombre
@@ -447,12 +531,13 @@ export class DocenteDatasourceImpl implements DocenteDatasource{
         }
     }
 
-    async getAllSolicitudes(): Promise<SolicitudEntity[]> {
+    async getSolicitudesPendientesByDocente(docente_id: number): Promise<SolicitudEntity[]> {
         try {
             const result = await this.db.query(
                 `SELECT 
                     s.*,
                     d.nombres as docente_nombre,
+                    d.apellidos as docente_apellidos,
                     c.nombre as carrera_nombre,
                     a.materia as asignatura_nombre,
                     e.nombre as estado_nombre
@@ -461,7 +546,41 @@ export class DocenteDatasourceImpl implements DocenteDatasource{
                  LEFT JOIN carreras c ON s.carrera_id = c.id
                  LEFT JOIN asignaturas a ON s.asignatura_id = a.id
                  LEFT JOIN estados e ON s.estado_id = e.id
-                 ORDER BY s.creado_en DESC`
+                 WHERE s.docente_id = $1 AND s.estado_id = 3
+                 ORDER BY s.creado_en DESC`,
+                [docente_id]
+            );
+            
+            return result.rows.map(row => this.mapSolicitud(row));
+        } catch (error) {
+            console.log(error);
+            throw CustomError.internalServer('Error al obtener las solicitudes pendientes del docente');
+        }
+    }
+
+    async getAllSolicitudes(): Promise<SolicitudEntity[]> {
+        try {
+            const result = await this.db.query(
+                `SELECT 
+                    s.*,
+                    d.nombres as docente_nombre,
+                    d.apellidos as docente_apellidos,
+                    c.nombre as carrera_nombre,
+                    a.materia as asignatura_nombre,
+                    e.nombre as estado_nombre
+                 FROM solicitudes s
+                 INNER JOIN docentes d ON s.docente_id = d.id
+                 LEFT JOIN carreras c ON s.carrera_id = c.id
+                 LEFT JOIN asignaturas a ON s.asignatura_id = a.id
+                 LEFT JOIN estados e ON s.estado_id = e.id
+                 ORDER BY 
+                    CASE s.estado_id 
+                        WHEN 3 THEN 1  -- Pendientes primero
+                        WHEN 1 THEN 2  -- Aprobadas segundo
+                        WHEN 2 THEN 3  -- Rechazadas tercero
+                        ELSE 4
+                    END,
+                    s.creado_en DESC`
             );
             
             return result.rows.map(row => this.mapSolicitud(row));
@@ -471,7 +590,7 @@ export class DocenteDatasourceImpl implements DocenteDatasource{
         }
     }
 
-    async updateSolicitudStatus(id: number, estado_id: number): Promise<SolicitudEntity> {
+    async updateSolicitudStatus(id: number, estado_id: number, motivo_rechazo?: string): Promise<SolicitudEntity> {
         try {
             // Obtener la solicitud actual
             const solicitudResult = await this.db.query(
@@ -511,13 +630,88 @@ export class DocenteDatasourceImpl implements DocenteDatasource{
                 [estado_id, id]
             );
             
-            return this.mapSolicitud(result.rows[0]);
+            // Obtener la solicitud actualizada con información completa
+            const solicitudCompleta = await this.db.query(
+                `SELECT 
+                    s.*,
+                    d.nombres as docente_nombre,
+                    d.apellidos as docente_apellidos,
+                    c.nombre as carrera_nombre,
+                    a.materia as asignatura_nombre,
+                    e.nombre as estado_nombre
+                 FROM solicitudes s
+                 INNER JOIN docentes d ON s.docente_id = d.id
+                 LEFT JOIN carreras c ON s.carrera_id = c.id
+                 LEFT JOIN asignaturas a ON s.asignatura_id = a.id
+                 LEFT JOIN estados e ON s.estado_id = e.id
+                 WHERE s.id = $1`,
+                [id]
+            );
+            
+            return this.mapSolicitud(solicitudCompleta.rows[0]);
         } catch (error) {
             if (error instanceof CustomError) {
                 throw error;
             }
             console.log(error);
             throw CustomError.internalServer('Error al actualizar el estado de la solicitud');
+        }
+    }
+
+    async getAsignaturasByCarrera(carrera_id: number): Promise<any> {
+        try {
+            // Primero obtener información de la carrera
+            const carreraResult = await this.db.query(`
+                SELECT id, nombre FROM carreras WHERE id = $1
+            `, [carrera_id]);
+
+            if (carreraResult.rows.length === 0) {
+                throw CustomError.notFound('Carrera no encontrada');
+            }
+
+            const carrera = carreraResult.rows[0];
+
+            // Obtener asignaturas de la carrera con docentes asociados
+            const asignaturasResult = await this.db.query(`
+                SELECT 
+                    a.id,
+                    a.materia,
+                    a.gestion,
+                    a.periodo,
+                    a.sem,
+                    a.semestres,
+                    a.carga_horaria,
+                    a.carrera_id,
+                    a.creado_en,
+                    a.modificado_en,
+                    STRING_AGG(
+                        CONCAT(d.nombres, ' ', d.apellidos), 
+                        ', ' ORDER BY d.nombres, d.apellidos
+                    ) as docentes_asociados
+                FROM asignaturas a
+                LEFT JOIN docentes_asignaturas da ON a.id = da.asignatura_id
+                LEFT JOIN docentes d ON da.docente_id = d.id
+                WHERE a.carrera_id = $1
+                GROUP BY a.id, a.materia, a.gestion, a.periodo, a.sem, a.semestres, a.carga_horaria, a.carrera_id, a.creado_en, a.modificado_en
+                ORDER BY a.sem, a.materia
+            `, [carrera_id]);
+
+            return {
+                carrera: {
+                    id: carrera.id,
+                    nombre: carrera.nombre
+                },
+                asignaturas: asignaturasResult.rows.map(row => DocenteMapper.asignaturaEntityFromObject({
+                    ...row,
+                    docentes_asociados: row.docentes_asociados || 'Sin docentes asignados'
+                }))
+            };
+        } catch (error) {
+            if (error instanceof CustomError) {
+                throw error;
+            }
+            console.log(error);
+            throw CustomError.internalServer('Error al obtener asignaturas de la carrera');
         }
     }
 
@@ -531,7 +725,9 @@ export class DocenteDatasourceImpl implements DocenteDatasource{
             row.estado_id,
             row.creado_en,
             row.modificado_en,
+            null, // motivo_rechazo - será null hasta que se agregue la columna
             row.docente_nombre,
+            row.docente_apellidos,
             row.carrera_nombre,
             row.asignatura_nombre,
             row.estado_nombre
@@ -609,13 +805,171 @@ export class DocenteDatasourceImpl implements DocenteDatasource{
     async deleteDocenteAsignatura(id: number): Promise<boolean> {
         try {
             const result = await this.db.query(
-                'DELETE FROM docentes_asignaturas WHERE id = $1 RETURNING id',
+                'DELETE FROM docentes_asignaturas WHERE id = $1 RETURNING *',
                 [id]
             );
-            return (result.rowCount ?? 0) > 0;
+            return result.rows.length > 0;
         } catch (error) {
             console.log(error);
-            throw CustomError.internalServer('Error al eliminar la relación docente-asignatura');
+            throw CustomError.internalServer('Error al eliminar relación docente-asignatura');
+        }
+    }
+
+    async deleteDocenteAsignaturaByAsignaturaAndDocente(asignatura_id: number, docente_id: number): Promise<boolean> {
+        try {
+            const result = await this.db.query(
+                'DELETE FROM docentes_asignaturas WHERE asignatura_id = $1 AND docente_id = $2 RETURNING *',
+                [asignatura_id, docente_id]
+            );
+            return result.rows.length > 0;
+        } catch (error) {
+            console.log(error);
+            throw CustomError.internalServer('Error al eliminar relación docente-asignatura');
+        }
+    }
+
+    // Métodos para admin - asignaturas
+    async getAllAsignaturasByCarreras(): Promise<any[]> {
+        try {
+            const result = await this.db.query(`
+                SELECT 
+                    c.id as carrera_id,
+                    c.nombre as carrera_nombre,
+                    a.id as asignatura_id,
+                    a.materia,
+                    a.gestion,
+                    a.periodo,
+                    a.sem,
+                    a.semestres,
+                    a.carga_horaria
+                FROM carreras c
+                LEFT JOIN asignaturas a ON c.id = a.carrera_id
+                ORDER BY c.nombre, a.sem, a.materia
+            `);
+
+            // Agrupar por carreras
+            const carrerasMap = new Map();
+            
+            result.rows.forEach(row => {
+                const carreraId = row.carrera_id;
+                
+                if (!carrerasMap.has(carreraId)) {
+                    carrerasMap.set(carreraId, {
+                        id: carreraId,
+                        nombre: row.carrera_nombre,
+                        asignaturas: []
+                    });
+                }
+                
+                if (row.asignatura_id) {
+                    carrerasMap.get(carreraId).asignaturas.push({
+                        id: row.asignatura_id,
+                        materia: row.materia,
+                        gestion: row.gestion,
+                        periodo: row.periodo,
+                        sem: row.sem,
+                        semestres: row.semestres,
+                        carga_horaria: row.carga_horaria
+                    });
+                }
+            });
+
+            return Array.from(carrerasMap.values());
+        } catch (error) {
+            console.log(error);
+            throw CustomError.internalServer('Error al obtener asignaturas por carreras');
+        }
+    }
+
+    async getAsignaturaById(asignatura_id: number): Promise<any> {
+        try {
+            const result = await this.db.query(`
+                SELECT 
+                    a.id,
+                    a.materia,
+                    a.gestion,
+                    a.periodo,
+                    a.sem,
+                    a.semestres,
+                    a.carga_horaria,
+                    a.creado_en,
+                    a.modificado_en,
+                    c.id as carrera_id,
+                    c.nombre as carrera_nombre
+                FROM asignaturas a
+                LEFT JOIN carreras c ON a.carrera_id = c.id
+                WHERE a.id = $1
+            `, [asignatura_id]);
+
+            if (result.rows.length === 0) {
+                throw CustomError.notFound('Asignatura no encontrada');
+            }
+
+            const asignatura = result.rows[0];
+            return {
+                id: asignatura.id,
+                materia: asignatura.materia,
+                gestion: asignatura.gestion,
+                periodo: asignatura.periodo,
+                sem: asignatura.sem,
+                semestres: asignatura.semestres,
+                carga_horaria: asignatura.carga_horaria,
+                creado_en: asignatura.creado_en,
+                modificado_en: asignatura.modificado_en,
+                carrera: {
+                    id: asignatura.carrera_id,
+                    nombre: asignatura.carrera_nombre
+                }
+            };
+        } catch (error) {
+            if (error instanceof CustomError) {
+                throw error;
+            }
+            console.log(error);
+            throw CustomError.internalServer('Error al obtener asignatura');
+        }
+    }
+
+    async getDocentesByAsignatura(asignatura_id: number): Promise<any> {
+        try {
+            // Primero obtener información de la asignatura
+            const asignaturaResult = await this.db.query(`
+                SELECT id, materia FROM asignaturas WHERE id = $1
+            `, [asignatura_id]);
+
+            if (asignaturaResult.rows.length === 0) {
+                throw CustomError.notFound('Asignatura no encontrada');
+            }
+
+            const asignatura = asignaturaResult.rows[0];
+
+            // Obtener docentes asociados a la asignatura
+            const docentesResult = await this.db.query(`
+                SELECT 
+                    d.id,
+                    d.nombres,
+                    d.apellidos,
+                    d.correo_electronico,
+                    d.foto_docente
+                FROM docentes d
+                INNER JOIN docentes_asignaturas da ON d.id = da.docente_id
+                WHERE da.asignatura_id = $1
+                ORDER BY d.apellidos, d.nombres
+            `, [asignatura_id]);
+
+            return {
+                asignatura: {
+                    id: asignatura.id,
+                    materia: asignatura.materia
+                },
+                docentes: docentesResult.rows
+            };
+        } catch (error) {
+            if (error instanceof CustomError) {
+                throw error;
+            }
+            console.log(error);
+            throw CustomError.internalServer('Error al obtener docentes de la asignatura');
         }
     }
 

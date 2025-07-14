@@ -102,6 +102,7 @@ export class AsignaturaEntity {
         public modificado_en: Date,
         // Campos adicionales para nombres
         public carrera_nombre?: string,
+        public docentes_asociados?: string,
     ) {}
 }
 
@@ -115,8 +116,10 @@ export class SolicitudEntity {
         public estado_id: number,
         public creado_en: Date,
         public modificado_en: Date,
+        public motivo_rechazo?: string | null,
         // Campos adicionales para nombres
         public docente_nombre?: string,
+        public docente_apellidos?: string,
         public carrera_nombre?: string,
         public asignatura_nombre?: string,
         public estado_nombre?: string,

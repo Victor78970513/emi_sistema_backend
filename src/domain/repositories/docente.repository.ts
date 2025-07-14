@@ -12,6 +12,8 @@ export abstract class DocenteRepository{
 
     abstract getPersonalInfo(docenteId:string):Promise<DocenteEntity>
 
+    abstract getDocenteById(docenteId: number): Promise<DocenteEntity>
+
     abstract getAllDocentes(): Promise<DocenteEntity[]>
 
     abstract updateDocente(docenteId: string, update: UpdateDocenteDto): Promise<DocenteEntity>
@@ -37,11 +39,19 @@ export abstract class DocenteRepository{
     // Métodos para solicitudes
     abstract createSolicitud(dto: CreateSolicitudDto): Promise<SolicitudEntity>;
     abstract getSolicitudesByDocente(docente_id: number): Promise<SolicitudEntity[]>;
+    abstract getSolicitudesPendientesByDocente(docente_id: number): Promise<SolicitudEntity[]>;
     abstract getAllSolicitudes(): Promise<SolicitudEntity[]>;
-    abstract updateSolicitudStatus(id: number, estado_id: number): Promise<SolicitudEntity>;
+    abstract updateSolicitudStatus(id: number, estado_id: number, motivo_rechazo?: string): Promise<SolicitudEntity>;
 
     // Métodos para docentes_asignaturas
     abstract createDocenteAsignatura(dto: CreateDocenteAsignaturaDto): Promise<DocenteAsignaturaEntity>;
     abstract getDocenteAsignaturas(docente_id: number): Promise<DocenteAsignaturaEntity[]>;
     abstract deleteDocenteAsignatura(id: number): Promise<boolean>;
+    abstract deleteDocenteAsignaturaByAsignaturaAndDocente(asignatura_id: number, docente_id: number): Promise<boolean>;
+
+    // Métodos para admin - asignaturas
+    abstract getAllAsignaturasByCarreras(): Promise<any[]>;
+    abstract getAsignaturaById(asignatura_id: number): Promise<any>;
+    abstract getDocentesByAsignatura(asignatura_id: number): Promise<any>;
+    abstract getAsignaturasByCarrera(carrera_id: number): Promise<any>;
 }

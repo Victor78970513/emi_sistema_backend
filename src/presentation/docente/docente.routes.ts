@@ -56,6 +56,7 @@ export class DocenteRoutes{
         // Rutas para solicitudes
         router.post('/solicitudes', AuthMiddleware.validateJWT, controller.createSolicitud);
         router.get('/solicitudes', AuthMiddleware.validateJWT, controller.getSolicitudesByDocente);
+        router.get('/solicitudes-pendientes', AuthMiddleware.validateJWT, controller.getSolicitudesPendientesByDocente);
 
         // Ruta para asignaturas por carreras (asignaturas disponibles para solicitar)
         router.get('/asignaturas', AuthMiddleware.validateJWT, controller.getAsignaturasPorCarreras);
