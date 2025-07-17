@@ -140,5 +140,8 @@ export class DocenteAsignaturaEntity {
         public gestion?: number,
         public periodo?: string,
         public semestres?: string,
+        // NUEVOS CAMPOS para carga horaria semanal
+        public horas_semanales?: number,
+        public carga_horaria?: number,
     ) {}
 }

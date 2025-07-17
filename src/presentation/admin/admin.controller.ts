@@ -217,7 +217,7 @@ export class AdminController {
     }
 
     // Método para obtener docente por ID
-    getDocenteById = (req: Request, res: Response) => {
+    getDocenteById = async (req: Request, res: Response) => {
         const { id } = req.params;
         
         if (!id) {
@@ -225,10 +225,21 @@ export class AdminController {
             return;
         }
 
-        new GetDocenteById(this.docenteRepository)
-            .execute(Number(id))
-            .then(data => res.json(data))
-            .catch(error => this.handleError(error, res));
+        try {
+            // Obtener datos del docente
+            const docente = await new GetDocenteById(this.docenteRepository).execute(Number(id));
+            // Obtener asignaturas asociadas
+            const asignaturas = await this.docenteRepository.getDocenteAsignaturas(Number(id));
+            // Calcular total de horas semanales
+            const total_horas_semanales = asignaturas.reduce((acc, a) => acc + (a.horas_semanales || 0), 0);
+            res.json({
+                docente,
+                asignaturas,
+                total_horas_semanales
+            });
+        } catch (error) {
+            this.handleError(error, res);
+        }
     }
 
     // Método para descargar PDF de asignaturas por carrera

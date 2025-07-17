@@ -416,6 +416,38 @@ export class DocenteDatasourceImpl implements DocenteDatasource{
                 throw CustomError.notFound('Docente no encontrado');
             }
 
+            // Validación de carga horaria si es solicitud de asignatura
+            if (tipo_solicitud === 'asignatura' && asignatura_id) {
+                // Obtener carga_horaria de la asignatura
+                const asignaturaResult = await this.db.query('SELECT id, carga_horaria FROM asignaturas WHERE id = $1', [asignatura_id]);
+                if (asignaturaResult.rows.length === 0) {
+                    throw CustomError.notFound('Asignatura no encontrada');
+                }
+                const carga_horaria = asignaturaResult.rows[0].carga_horaria;
+                const horas_semanales_nueva = carga_horaria / 40;
+                // Calcular la carga horaria semanal actual del docente
+                const horasResult = await this.db.query(
+                    `SELECT SUM(a.carga_horaria) as total_carga
+                     FROM docentes_asignaturas da
+                     INNER JOIN asignaturas a ON da.asignatura_id = a.id
+                     WHERE da.docente_id = $1`,
+                    [docente_id]
+                );
+                const total_carga = horasResult.rows[0].total_carga || 0;
+                const horas_semanales_actual = total_carga / 40;
+                const horas_semanales_total = horas_semanales_actual + horas_semanales_nueva;
+                // LOGS PARA DEPURACIÓN
+                console.log('--- VALIDACIÓN DE CARGA HORARIA (SOLICITUD) ---');
+                console.log('Docente ID:', docente_id);
+                console.log('Horas semanales actuales:', horas_semanales_actual);
+                console.log('Horas semanales nueva asignatura:', horas_semanales_nueva);
+                console.log('Horas semanales total:', horas_semanales_total);
+                // FIN LOGS
+                if (horas_semanales_total >= 25) {
+                    throw CustomError.badRequest('No se puede solicitar: el docente igualaría o superaría las 25 horas semanales.');
+                }
+            }
+
             // Verificar que la carrera existe si se especifica
             if (carrera_id) {
                 const carreraResult = await this.db.query('SELECT id FROM carreras WHERE id = $1', [carrera_id]);
@@ -744,10 +776,34 @@ export class DocenteDatasourceImpl implements DocenteDatasource{
                 throw CustomError.notFound('Docente no encontrado');
             }
 
-            // Verificar que la asignatura existe
-            const asignaturaResult = await this.db.query('SELECT id FROM asignaturas WHERE id = $1', [asignatura_id]);
+            // Verificar que la asignatura existe y obtener su carga_horaria
+            const asignaturaResult = await this.db.query('SELECT id, carga_horaria FROM asignaturas WHERE id = $1', [asignatura_id]);
             if (asignaturaResult.rows.length === 0) {
                 throw CustomError.notFound('Asignatura no encontrada');
+            }
+            const carga_horaria = asignaturaResult.rows[0].carga_horaria;
+            const horas_semanales_nueva = carga_horaria / 40;
+
+            // Calcular la carga horaria semanal actual del docente
+            const horasResult = await this.db.query(
+                `SELECT SUM(a.carga_horaria) as total_carga
+                 FROM docentes_asignaturas da
+                 INNER JOIN asignaturas a ON da.asignatura_id = a.id
+                 WHERE da.docente_id = $1`,
+                [docente_id]
+            );
+            const total_carga = horasResult.rows[0].total_carga || 0;
+            const horas_semanales_actual = total_carga / 40;
+            const horas_semanales_total = horas_semanales_actual + horas_semanales_nueva;
+            // LOGS PARA DEPURACIÓN
+            console.log('--- VALIDACIÓN DE CARGA HORARIA ---');
+            console.log('Docente ID:', docente_id);
+            console.log('Horas semanales actuales:', horas_semanales_actual);
+            console.log('Horas semanales nueva asignatura:', horas_semanales_nueva);
+            console.log('Horas semanales total:', horas_semanales_total);
+            // FIN LOGS
+            if (horas_semanales_total >= 25) {
+                throw CustomError.badRequest('No se puede asociar: el docente igualaría o superaría las 25 horas semanales.');
             }
 
             // Verificar que no existe ya esta relación
@@ -786,16 +842,26 @@ export class DocenteDatasourceImpl implements DocenteDatasource{
                     a.materia as asignatura_nombre,
                     a.gestion,
                     a.periodo,
-                    a.semestres
+                    a.semestres,
+                    a.carga_horaria,
+                    c.nombre as carrera_nombre
                  FROM docentes_asignaturas da
                  INNER JOIN docentes d ON da.docente_id = d.id
                  INNER JOIN asignaturas a ON da.asignatura_id = a.id
+                 INNER JOIN carreras c ON a.carrera_id = c.id
                  WHERE da.docente_id = $1
                  ORDER BY da.creado_en DESC`,
                 [docente_id]
             );
-            
-            return result.rows.map(row => this.mapDocenteAsignatura(row));
+            // Agregar campo horas_semanales calculado
+            return result.rows.map(row => {
+                const horas_semanales = row.carga_horaria ? row.carga_horaria / 40 : 0;
+                const entity = this.mapDocenteAsignatura(row);
+                (entity as any).horas_semanales = horas_semanales;
+                (entity as any).carga_horaria = row.carga_horaria;
+                (entity as any).carrera_nombre = row.carrera_nombre;
+                return entity;
+            });
         } catch (error) {
             console.log(error);
             throw CustomError.internalServer('Error al obtener las asignaturas del docente');
